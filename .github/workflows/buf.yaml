@@ -16,4 +16,5 @@ jobs:
         with:
           version: 1.50.0 # Keep in sync with Makefile BUF_VERSION
           format: false # Turn off format, since most proto definitions are for testing
+          breaking: false # Temporarily turn-off breaking, since we are splitting up the modules
           token: ${{ secrets.BUF_TOKEN }}
