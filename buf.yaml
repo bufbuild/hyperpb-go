@@ -1,13 +1,16 @@
 version: v2
 modules:
-  - path: internal/proto
+  - path: internal/proto/example
+    name: buf.build/bufbuild/hyperpb-examples
+  - path: internal/proto/test
+  - path: internal/proto/rsb
 deps:
   - buf.build/bufbuild/protovalidate:v0.13.0
 lint:
   use:
     - STANDARD
   ignore:
-    - internal/proto/test/descriptor.proto
+    - internal/proto/test/test/descriptor.proto
 breaking:
   use:
     - WIRE_JSON

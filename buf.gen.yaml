@@ -11,3 +11,5 @@ plugins:
   - remote: buf.build/protocolbuffers/go
     out: internal/gen
     opt: paths=source_relative
+inputs:
+  - directory: .

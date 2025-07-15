@@ -8,3 +8,9 @@ plugins:
   - remote: buf.build/community/planetscale-vtprotobuf
     out: internal/gen
     opt: paths=source_relative
+inputs:
+  - directory: .
+    # Work around a bug
+    exclude_paths:
+      - internal/proto/test/test/proto2.proto
+      - internal/proto/test/test/editions.proto

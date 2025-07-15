@@ -30,7 +30,7 @@ COPYRIGHT_YEARS := 2025
 LICENSE_IGNORE := testdata/
 
 GO_VERSION := go1.24.4
-BUF_VERSION := v1.50.0
+BUF_VERSION := v1.50.0 # Keep in sync w/ .github/workflows/buf.yaml.
 LINT_VERSION := v2.1.6 # Keep in sync w/ .github/workflows/ci.yaml.
 
 GOOS_HOST := $(shell go env GOOS)
@@ -152,10 +152,9 @@ checkgenerate:
 	@# Used in CI to verify that `make generate` doesn't produce a diff.
 	git --no-pager diff --exit-code >&2
 
-internal/gen/*/*.pb.go: $(BIN)/buf internal/proto/*/*.proto internal/proto/*/*/*.proto
+internal/gen/*/*.pb.go: $(BIN)/buf internal/proto/*/*/*.proto internal/proto/*/*/*/*.proto
 	$(BIN)/buf generate --clean
-	$(BIN)/buf generate --template buf.gen.vt.yaml \
-		--exclude-path internal/proto/test/proto2.proto,internal/proto/test/editions.proto # Work around a bug.
+	$(BIN)/buf generate --template buf.gen.vt.yaml
 
 .PHONY: $(BIN)/hypertest
 $(BIN)/hypertest: generate
