@@ -17,11 +17,11 @@ package hyperpb_test
 import (
 	"fmt"
 
+	weatherv1 "buf.build/gen/go/bufbuild/hyperpb-examples/protocolbuffers/go/example/weather/v1"
 	"buf.build/go/protovalidate"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	weatherv1 "buf.build/gen/go/bufbuild/hyperpb-examples/protocolbuffers/go/example/weather/v1"
 	"buf.build/go/hyperpb"
 	"buf.build/go/hyperpb/internal/examples"
 )
