@@ -16,8 +16,6 @@ many nested messages.
 
 <!-- TODO: benchmarks -->
 
-<!-- TODO: replace all instances of buf.build/go/hyperpb/internal/gen/example -->
-
 ## Usage
 
 The core conceit of `hyperpb` is that you must pre-compile a parser using
