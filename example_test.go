@@ -26,6 +26,7 @@ import (
 	weatherv1 "buf.build/go/hyperpb/internal/gen/example/weather/v1"
 )
 
+// Example data matches the data in the README example and should be kept in sync.
 func Example() {
 	// Compile a type for your message. This operation is quite slow, so it
 	// should be cached, like regexp.Compile.
