@@ -23,6 +23,7 @@ require (
 )
 
 require (
+	buf.build/gen/go/bufbuild/hyperpb-examples/protocolbuffers/go v1.36.6-20250715221440-d4a38b1e38a1.1 // indirect
 	cel.dev/expr v0.24.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
