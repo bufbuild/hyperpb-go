@@ -15,4 +15,5 @@ jobs:
       - uses: bufbuild/buf-action@v1
         with:
           version: 1.50.0 # Keep in sync with Makefile BUF_VERSION
+          format: false # Turn off format, since most proto definitions are for testing
           token: ${{ secrets.BUF_TOKEN }}
