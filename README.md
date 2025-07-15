@@ -1,20 +1,22 @@
-![The Buf logo](./.github/buf-logo.svg)
+![The Buf logo](https://raw.githubusercontent.com/bufbuild/hyperpb-go/main/.github/buf-logo.svg)
 
 # hyperpb
 
 `hyperpb` is a highly optimized dynamic message library for Protobuf or read-only
 workloads. It is designed to be a drop-in replacement for
-[`dynamicpb`](https://pkg.go.dev/google.golang.org/protobuf/types/dynamicpb),
+[`dynamicpb`][dynamicpb],
 `protobuf-go`'s canonical solution for working with completely dynamic messages.
 
 `hyperpb`'s parser is an efficient VM for a special instruction set, a variant of
-table-driven parsing (TDP), pioneered by [the UPB project](https://github.com/protocolbuffers/protobuf/tree/main/upb).
+table-driven parsing (TDP), pioneered by [the UPB project][upb].
 
 Our parser is very fast, beating `dynamicpb` by 10x, and often beating
 `protobuf-go`'s generated code by a factor of 2-3x, especially for workloads with
 many nested messages.
 
 <!-- TODO: benchmarks -->
+
+<!-- TODO: replace all instances of buf.build/go/hyperpb/internal/gen/example -->
 
 ## Usage
 
@@ -29,14 +31,19 @@ our binary, and parse some data with it.
 
 ```go
 package main
+
 import (
     "fmt"
+    "log"
 
     "buf.build/go/hyperpb"
     "google.golang.org/protobuf/proto"
 
-    weatherv1 "github.com/..."
+    weatherv1 "buf.build/go/hyperpb/internal/gen/example/weather/v1"
 )
+
+// Weather data byte slice.
+var weatherDataBytes = []byte{0xa, 0x7, 0x53, 0x65, 0x61, 0x74, 0x74, 0x6c, 0x65, 0x12, 0x1d, 0xa, 0x5, 0x4b, 0x41, 0x44, 0x39, 0x33, 0x15, 0x66, 0x86, 0x22, 0x43, 0x1d, 0xcd, 0xcc, 0x34, 0x41, 0x25, 0xd7, 0xa3, 0xf0, 0x41, 0x2d, 0x33, 0x33, 0x13, 0x40, 0x30, 0x3, 0x12, 0x1d, 0xa, 0x5, 0x4b, 0x48, 0x42, 0x36, 0x30, 0x15, 0xcd, 0x8c, 0x22, 0x43, 0x1d, 0x33, 0x33, 0x5b, 0x41, 0x25, 0x52, 0xb8, 0xe0, 0x41, 0x2d, 0x33, 0x33, 0xf3, 0x3f, 0x30, 0x3}
 
 func main() {
     // Compile a type for your message. Make sure to cache this!
@@ -45,14 +52,13 @@ func main() {
         (*weatherv1.WeatherReport)(nil).ProtoReflect().Descriptor(),
     )
 
-    data := /* ... */
-
     // Allocate a fresh message using that type.
     msg := hyperpb.NewMessage(msgType)
 
     // Parse the message, using proto.Unmarshal like any other message type.
-    if err := proto.Unmarshal(data, msg); err != nil {
+    if err := proto.Unmarshal(weatherDataBytes, msg); err != nil {
         // Handle parse failure.
+        log.Fatalf("failed to parse weather data: %v", err)
     }
 
     // Use reflection to read some fields. hyperpb currently only supports access
@@ -95,23 +101,23 @@ is included in the documentation.
 
 ### Using types from a registry
 
-We can use the `hyperpb.CompileForBytes` function to parse a dynamic type and
+We can use the `hyperpb.CompileFileDescriptorSet` function to parse a dynamic type and
 use it to walk the fields of a message:
 
 ```go
-package main
-
-import (
-    "buf.build/go/hyperpb"
-    "google.golang.org/protobuf/proto"
-)
-
-func main() {
-    msgType := hyperpb.CompileFileDescriptorSet(schema, messageName) // Remember to cache this!
+func processDynamicMessage(
+    schema *descriptorpb.FileDescriptorSet,
+    messageName protoreflect.FullName,
+    data []byte,
+) error {
+    msgType, err := hyperpb.CompileFileDescriptorSet(schema, messageName) // Remember to cache this!
+    if err != nil {
+        return err
+    }
 
     msg := hyperpb.NewMessage(msgType)
     if err := proto.Unmarshal(data, msg); err != nil {
-        // Handle parse failure.
+        return err
     }
 
     // Range will iterate over all of the populated fields in msg. Here we
@@ -119,6 +125,7 @@ func main() {
     for field, value := range msg.Range {
         // Do something with each populated field.
     }
+    return nil
 }
 ```
 
@@ -127,50 +134,47 @@ we can use them as an efficient transcoding medium from the wire format, for
 runtime-loaded messages.
 
 ```go
-package main
+func dynamicMessageToJSON(
+    schema *descriptorpb.FileDescriptorSet,
+    messageName protoreflect.FullName,
+    data []byte,
+) ([]byte, error) {
+    msgType, err := hyperpb.CompileFileDescriptorSet(schema, messageName)
+    if err != nil {
+        return nil, err
+    }
 
-import (
-    "buf.build/go/hyperpb"
-    "google.golang.org/protobuf/encoding/protojson"
-    "google.golang.org/protobuf/proto"
-)
-
-func main() {
-    // Unmarshal like before.
-    msgType := hyperpb.CompileFileDescriptorSet(schema, messageName)
     msg := hyperpb.NewMessage(msgType)
     if err := proto.Unmarshal(data, msg); err != nil {
-        // ...
+        return nil, err
     }
 
     // Dump the message to JSON. This just works!
-    bytes, err := protojson.Marshal(msg)
+    return protojson.Marshal(msg)
 }
 ```
 
 `protovalidate` also works directly on reflection, so it works out-of-the-box:
 
 ```go
-package main
-
-import (
-    "buf.build/go/hyperpb"
-    "buf.build/go/protovalidate"
-    "google.golang.org/protobuf/proto"
-)
-
-func main() {
+func validateDynamicMessage(
+    schema *descriptorpb.FileDescriptorSet,
+    messageName protoreflect.FullName,
+    data []byte,
+) error {
     // Unmarshal like before.
-    msgType := hyperpb.CompileFileDescriptorSet(schema, messageName)
+    msgType, err := hyperpb.CompileFileDescriptorSet(schema, messageName)
+    if err != nil {
+        return err
+    }
+
     msg := hyperpb.NewMessage(msgType)
     if err := proto.Unmarshal(data, msg); err != nil {
-        // Handle parse failure.
+        return err
     }
 
     // Run custom validation. This just works!
-    if err := protovalidate.Validate(msg); err != nil {
-        // Handle validation failure.
-    }
+    return protovalidate.Validate(msg)
 }
 ```
 
@@ -181,21 +185,21 @@ optimization knobs available. Calling `Message.Unmarshal` directly instead
 of `proto.Unmarshal` allows setting custom `UnmarshalOption`s:
 
 ```go
-package main
+func unmarshalWithCustomOptions(
+    schema *descriptorpb.FileDescriptorSet,
+    messageName protoreflect.FullName,
+    data []byte,
+) error {
+    msgType, err := hyperpb.CompileFileDescriptorSet(schema, messageName)
+    if err != nil {
+        return err
+    }
 
-import (
-    "buf.build/go/hyperpb"
-    "google.golang.org/protobuf/proto"
-)
-
-func main() {
-    msgType := hyperpb.CompileFileDescriptorSet(schema, messageName)
     msg := hyperpb.NewMessage(msgType)
-
-    // Unmarshal with custom performance knobs.
-    err := msg.Unmarshal(data,
+    return msg.Unmarshal(
+        data,
         hyperpb.WithMaxDecodeMisses(16),
-        // ...
+        // Additional options...
     )
 }
 ```
@@ -204,8 +208,11 @@ The compiler also takes `CompileOptions`, such as for configuring how extensions
 are resolved:
 
 ```go
-msgType := hyperpb.CompileFileDescriptorSet(schema, messageName,
+msgType, err := hyperpb.CompileFileDescriptor(
+    schema,
+    mesasgeName,
     hyperpb.WithExtensionsFromTypes(typeRegistry),
+    // Additional options...
 )
 ```
 
@@ -224,11 +231,10 @@ away, allowing for re-use. Consider the following example of a request handler:
 type requestContext struct {
     shared *hyperpb.Shared
     types map[string]*hyperpb.MessageType
-    // ...
+    // Additional context fields...
 }
 
 func (c *requestContext) Handle(req Request) {
-    // ...
     msgType := c.types[req.Type]
     msg := c.shared.NewMessage(msgType)
     defer c.shared.Free()
@@ -252,17 +258,12 @@ can build an optimized type, using that corpus as the profile, using
 `Type.Recompile`:
 
 ```go
-package pgo
-
-import (
-    "buf.build/go/hyperpb"
-    "google.golang.org/protobuf/proto"
-    "google.golang.org/protobuf/reflect/protoreflect"
-)
-
-func compilePGO(md protoreflect.MessageDescriptor, corpus [][]byte) *hyperpb.MessageType {
+func compilePGO(
+    md protoreflect.MessageDescriptor,
+    corpus [][]byte,
+) (*hyperpb.MessageType, error) {
     // Compile the type without any profiling information.
-    msgType := hyperpb.CompileForDescriptor(md)
+    msgType := hyperpb.CompileMessageDescriptor(md)
 
     // Construct a new profile recorder.
     profile := msgType.NewProfile()
@@ -271,65 +272,69 @@ func compilePGO(md protoreflect.MessageDescriptor, corpus [][]byte) *hyperpb.Mes
     // for all of them.
     s := new(hyperpb.Shared)
     for _, specimen := range corpus {
-        s.NewMessage(msgType).Unmarshal(hyperpb.RecordProfile(profile, 1.0))
+        if err := s.NewMessage(msgType).Unmarshal(
+            specimen,
+            hyperpb.WithRecordProfile(profile, 1.0),
+        ); err != nil {
+            return nil, err
+        }
         s.Free()
     }
 
     // Recompile with the profile.
-    return msgType.Recompile(profile)
+    return msgType.Recompile(profile), nil
 }
 ```
 
-Using a custom sampling rate in `hyperpb.RecordProfile`, it's possible to
+Using a custom sampling rate in `hyperpb.WithRecordProfile`, it's possible to
 sample data on-line as part of a request flow, and recompile dynamically:
 
 ```go
 type requestContext struct {
     shared *hyperpb.Shared
-    types map[string]*hyperpb.Type
-    // ...
+    types map[string]*typeInfo
+    // Additional context fields...
 }
 
 type typeInfo struct {
-    msgType atomic.Pointer[hyperpb.Type]
+    msgType atomic.Pointer[hyperpb.MessageType]
     prof atomic.Pointer[hyperpb.Profile]
     seen atomic.Int64
 }
 
 func (c *requestContext) Handle(req Request) {
     // Look up the type in the context's type map.
-    tyInfo := c.types[req.Type]
-    tyInfo.Lock()
-    
-    // Parse the type as usual.
-    msg := c.shared.NewMessage(tyInfo.msgType.Load())
-    defer c.shared.Free()
-    err := msg.Unmarshal(
-        // Only profile 1% of messages.
-        hyperpb.RecordProfile(tyInfo.prof.Load(), 0.01),
-    )
-    if err != nil {
-        // ...
-    }
-    tyInfo.seen.Add(1)
+    typeInfo := c.types[req.Type]
 
-    // Every 100,000 messages, spawn a goroutine to asynchronously recompile
-    // the type.
-    if tyInfo.seen.Load() % 100000 == 0 {
+    // Parse the type as usual.
+    msg := c.shared.NewMessage(typeInfo.msgType.Load())
+    defer c.shared.Free()
+
+    if err := msg.Unmarshal(
+        data,
+        // Only profile 1% of messages.
+        hyperpb.WithRecordProfile(typeInfo.prof.Load(), 0.01),
+    ); err != nil {
+        // Process error...
+    }
+    typeInfo.seen.Add(1)
+
+    // Every 100,000 messages, spawn a goroutine to asynchronously recompile the type.
+    if typeInfo.seen.Load() % 100000 == 0 {
         go func() {
-            prof := tyInfo.prof.Load()
-            if !tyInfo.CompareAndSwap(prof, nil) {
+            prof := typeInfo.prof.Load()
+            if !typeInfo.prof.CompareAndSwap(prof, nil) {
                 // Avoid a race condition.
                 return
             }
 
             // Recompile the type. This is gonna be really slow, because
             // the compiler is slow, which is why we're doing it asynchronously.
-            tyInfo.msgType.Store(tyInfo.msgType.Load().Recompile(tyInfo.prof))
-            tyInfo.prof.Store(tyInfo.NewProfile())
+            typeInfo.msgType.Store(typeInfo.msgType.Load().Recompile(typeInfo.prof.Load()))
+            typeInfo.prof.Store(typeInfo.msgType.Load().NewProfile())
         }
     }
-    
+
     // Do something with msg.
 }
 ```
@@ -348,4 +353,8 @@ parser will require benchmarks; you can run them with `make bench`.
 
 ## Legal
 
-Offered under the [Apache 2 license](https://github.com/bufbuild/bufplugin-go/blob/main/LICENSE).
+Offered under the [Apache 2 license][license].
+
+[dynamicpb]: https://pkg.go.dev/google.golang.org/protobuf/types/dynamicpb
+[upb]: https://github.com/protocolbuffers/protobuf/tree/main/upb
+[license]: https://github.com/bufbuild/hyperpb-go/blob/main/LICENSE
