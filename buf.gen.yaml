@@ -3,13 +3,13 @@ managed:
   enabled: true
   override:
   - file_option: go_package_prefix
-    value: buf.build/go/hyperpb/internal/gen
+    value: buf.build/go/hyperpb/test/internal/gen
   disable:
   - file_option: go_package
     module: buf.build/bufbuild/protovalidate
 plugins:
   - remote: buf.build/protocolbuffers/go
-    out: internal/gen
+    out: test/internal/gen
     opt: paths=source_relative
 inputs:
   - directory: .

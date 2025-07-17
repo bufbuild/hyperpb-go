@@ -3,10 +3,10 @@ managed:
   enabled: true
   override:
    - file_option: go_package_prefix
-     value: buf.build/go/hyperpb/internal/gen
+     value: buf.build/go/hyperpb/test/internal/gen
 plugins:
   - remote: buf.build/community/planetscale-vtprotobuf
-    out: internal/gen
+    out: test/internal/gen
     opt: paths=source_relative
 inputs:
   - directory: .
