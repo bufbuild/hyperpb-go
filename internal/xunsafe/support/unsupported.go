@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !(amd64 || arm64)
+//go:build !(amd64 || arm64 || hyperpb.unsupported)
 
 package support
 
 /*
 // cgo is the only real option we have for triggering a custom compiler error.
-#error "unsupported architecture; hyperpb only supports x86_64 and aarch64"
+#error "unsupported architecture; see https://github.com/bufbuild/hyperpb-go/blob/main/README.md#supported-targets"
 */
 import "C"

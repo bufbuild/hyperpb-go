@@ -154,6 +154,11 @@
 // v1. It currently implements all Protobuf language constructs. It does not
 // implement mutation of parsed messages, however.
 //
+// hyperpb is currently only supported on 64-bit x86 and ARM targets (Go calls
+// these amd64 and arm64). The library will not build on other architectures,
+// and PRs to add new architectures without a way to run tests for them in CI will
+// be rejected.
+//
 // [the UPB project]: https://github.com/protocolbuffers/protobuf/tree/main/upb
 package hyperpb
 
