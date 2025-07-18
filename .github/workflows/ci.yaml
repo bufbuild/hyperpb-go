@@ -39,25 +39,25 @@ jobs:
           restore-keys: "${{ runner.os }}-hyperpb-ci-"
 
       - name: Check Generated Files
-        if: ${{ matrix.mode == fast }}
+        if: ${{ matrix.mode == 'fast' }}
         run: |
           make generate
           make checkgenerate
 
       - name: Test
-        if: ${{ matrix.mode == fast }}
+        if: ${{ matrix.mode == 'fast' }}
         run: make test
 
       - name: Test Debug
-        if: ${{ matrix.mode == debug }}
+        if: ${{ matrix.mode == 'debug' }}
         run: make test TAGS=debug
 
       - name: Test Race
-        if: ${{ matrix.mode == race }}
+        if: ${{ matrix.mode == 'race' }}
         run: make test HYPERTESTFLAGS=-race
 
       - name: Benchmark
-        if: ${{ matrix.mode == fast }}
+        if: ${{ matrix.mode == 'fast' }}
         run: make bench BENCHMARK="B/^descriptor.yaml" 
 
   lint:
