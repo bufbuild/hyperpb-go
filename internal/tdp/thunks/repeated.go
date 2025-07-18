@@ -268,6 +268,7 @@ func parseRepeatedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 
 //go:nosplit
+//go:norace // Race instrumentation causes this function to fail the nosplit check.
 //hyperpb:stencil parsePackedVarint8 parsePackedVarint[uint8]
 //hyperpb:stencil parsePackedVarint32 parsePackedVarint[uint32]
 //hyperpb:stencil parsePackedVarint64 parsePackedVarint[uint64]

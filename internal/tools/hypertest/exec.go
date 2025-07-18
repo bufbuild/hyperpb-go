@@ -46,6 +46,7 @@ type runner struct {
 	tags     string   // Build tags to use.
 	profile  bool     // If set, -cpuprofile will be set.
 	checkptr bool     // Whether to build with -c=checkptr.
+	race     bool     // Whether to build with -race.
 	args     []string // Args for the test binary(s).
 }
 
@@ -79,21 +80,26 @@ func (r *runner) build() ([]test, error) {
 		return nil, err
 	}
 
-	checkptr := "-gcflags=-d=checkptr=0"
-	if r.checkptr {
-		checkptr = "-gcflags=-d=checkptr=1"
-	}
-
-	// Build the command we're going to run.
-	cmd := exec.Command(
-		r.tool,
+	args := []string{
 		"test",
+		r.pkgs,
 		"-c",
 		"-o", r.output,
 		"-tags", r.tags,
-		checkptr,
-		r.pkgs,
-	)
+	}
+
+	if r.tags != "" {
+		args = append(args, "-tags", r.tags)
+	}
+	if r.checkptr {
+		args = append(args, "-gcflags=-d=checkptr=1")
+	}
+	if r.race {
+		args = append(args, "-race")
+	}
+
+	// Build the command we're going to run.
+	cmd := exec.Command(r.tool, args...)
 	cmd.Env = os.Environ()
 	fmt.Printf("running: %s %s\n", cmd.Path, strings.Join(cmd.Args, " "))
 	if out, err := cmd.CombinedOutput(); err != nil {
