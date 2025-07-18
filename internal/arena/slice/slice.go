@@ -72,7 +72,7 @@ func (s Slice[_]) Len() int {
 	return int(s.len)
 }
 
-// SetLet directly sets the length of s.
+// SetLen directly sets the length of s.
 func (s Slice[T]) SetLen(n int) Slice[T] {
 	if debug.Enabled && n > int(s.cap) {
 		panic(fmt.Errorf("runtime error: SetLen(%v) with Cap() = %v", n, s.cap))
