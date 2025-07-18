@@ -357,6 +357,17 @@ func (c *requestContext) Handle(req Request) {
 `v1`. It currently implements all Protobuf language constructs. It does not
 implement mutation of parsed messages, however.
 
+### Supported Targets
+
+`hyperpb` is currently only supported on 64-bit x86 and ARM targets (Go calls
+these `amd64` and `arm64`). The library will not build on other architectures,
+and PRs to add new architectures without a way to run tests for them in CI will
+be rejected.
+
+Support for 32-bit targets is unlikely to happen; `hyperpb` assumes a 64-bit
+general-purpose register width, and attempting to tune for a 32-bit register
+size will require a parallel implementation of the parser VM.
+
 ## Contributing
 
 For a detailed explanation of the implementation details of `hyperpb`, see
