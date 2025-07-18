@@ -8342,6 +8342,7 @@ func parseRepeatedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 
 //go:nosplit
+//go:norace // Race instrumentation causes this function to fail the nosplit check.
 func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint8]
 	var n int
@@ -8471,6 +8472,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 
 //go:nosplit
+//go:norace // Race instrumentation causes this function to fail the nosplit check.
 func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint32]
 	var n int
@@ -8600,6 +8602,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 
 //go:nosplit
+//go:norace // Race instrumentation causes this function to fail the nosplit check.
 func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint64]
 	var n int

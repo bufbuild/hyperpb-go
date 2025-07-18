@@ -111,23 +111,27 @@ func parseDirectives(f *ast.File) (dirs []Directive) {
 // stencil it, and constructs a new function AST with the stencil operations
 // applied.
 //
-// bases and nosplits are used to track information used for postprocessing:
-// namely, imports and //go:nosplit insertions, respectively.
+// bases and attrs are used to track information used for postprocessing:
+// namely, imports and //go: directives, respectively.
 func makeStencil(
 	dir Directive,
 	generic *ast.FuncDecl,
-	bases, nosplits *xsync.Set[string],
+	bases *xsync.Set[string],
+	attrs *xsync.Map[string, []string],
 ) (*ast.FuncDecl, error) {
 	if generic == nil {
 		return nil, fmt.Errorf("no function with name %s", dir.Source)
 	}
 	generic.Name.Obj = nil
 
+	var attrComments []string
 	for _, c := range generic.Doc.List {
-		if c.Text == "//go:nosplit" {
-			nosplits.Store(dir.Target)
-			break
+		if strings.HasPrefix(c.Text, "//go:") {
+			attrComments = append(attrComments, c.Text)
 		}
+	}
+	if attrComments != nil {
+		attrs.Store(dir.Target, attrComments)
 	}
 
 	// Make a deep copy of the function so that we can edit it.
@@ -346,9 +350,10 @@ func run() error {
 		out  = ast.File{Name: ast.NewIdent("x")}
 		fset = token.NewFileSet()
 
-		imports         xsync.Map[string, *ast.ImportSpec]
-		bases, nosplits xsync.Set[string]
-		pkgCache        xsync.Map[string, []*packages.Package]
+		imports  xsync.Map[string, *ast.ImportSpec]
+		bases    xsync.Set[string]
+		attrs    xsync.Map[string, []string]
+		pkgCache xsync.Map[string, []*packages.Package]
 	)
 
 	wg := new(sync.WaitGroup)
@@ -440,7 +445,7 @@ func run() error {
 
 					// Start by finding a func in file with this name.
 					generic := funcs[dir.Source]
-					stencil, err := makeStencil(dir, generic, &bases, &nosplits)
+					stencil, err := makeStencil(dir, generic, &bases, &attrs)
 					if err != nil {
 						ch <- err
 						return
@@ -497,8 +502,8 @@ import (%s)
 	source := buf.String()
 
 	oldnew := []string{"package x\n", header}
-	for name := range nosplits.All() {
-		oldnew = append(oldnew, "func "+name, "//go:nosplit\nfunc "+name)
+	for name, attrs := range attrs.All() {
+		oldnew = append(oldnew, "func "+name, strings.Join(attrs, "\n")+"\nfunc "+name)
 	}
 	source = strings.NewReplacer(oldnew...).Replace(source)
 	bytes, err := format.Source([]byte(source))

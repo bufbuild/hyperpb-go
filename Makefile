@@ -48,10 +48,14 @@ EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) 
 unexport GOOS
 unexport GOARCH
 
+HYPERTESTFLAGS ?=
+TESTFLAGS ?=
+BENCHFLAGS ?= -test.benchmem
+
 GO ?= go
 GO_HOST := $(HOST_TARGET) $(GO)
 GO := $(EXEC_ENV) $(GO)
-TEST := $(EXEC_ENV) $(BIN)/hypertest -o $(TESTS)
+TEST := $(EXEC_ENV) $(BIN)/hypertest -o $(TESTS) $(HYPERTESTFLAGS)
 
 TAGS ?= ""
 REMOTE ?= ""
@@ -66,8 +70,6 @@ else
 	PKGS := $(PKG)
 endif
 PKG ?= .
-TESTFLAGS ?=
-BENCHFLAGS ?= -test.benchmem
 
 .PHONY: help
 help: ## Describe useful make targets

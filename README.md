@@ -21,10 +21,10 @@ Here, we show two benchmark variants for `hyperpb`: out-of-the-box performance w
 ## Usage
 
 The core conceit of `hyperpb` is that you must pre-compile a parser using
-`hyperpb.Compile` at runtime, much like regular expressions require that you use
+`hyperpb.Compile` at runtime, much like regular expressions require that you
 `regexp.Compile` them. Doing this allows `hyperpb` to run optimization passes on
 your message, and delaying it to runtime allows us to continuously improve
-layout optimizations, withing making any source-breaking changes.
+layout optimizations, without making any source-breaking changes.
 
 For example, let's say that we want to compile a parser for some type baked into
 our binary, and parse some data with it.

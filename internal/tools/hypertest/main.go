@@ -35,6 +35,7 @@ var (
 	profile  = flag.Bool("profile", false, "whether to collect CPU profiles")
 	remote   = flag.String("remote", "", "SSH remote to run tests at")
 	checkptr = flag.Bool("checkptr", false, "build with checkptr (crappy asan) instrumentation")
+	race     = flag.Bool("race", false, "build with -race")
 
 	benchCsv   = flag.String("csv", "", "file for benchmark csv output")
 	benchTable = flag.String("table", "", "file for benchmark table output")
@@ -63,6 +64,7 @@ func run() error {
 		tags:     *tags,
 		profile:  *profile,
 		checkptr: *checkptr,
+		race:     *race,
 		args:     flag.Args(),
 	}
 
