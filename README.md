@@ -222,7 +222,7 @@ are resolved:
 ```go
 msgType, err := hyperpb.CompileFileDescriptor(
     schema,
-    mesasgeName,
+    messageName,
     hyperpb.WithExtensionsFromTypes(typeRegistry),
     // Additional options...
 )
