@@ -14,7 +14,7 @@ Our parser is very fast, beating `dynamicpb` by 10x, and often beating
 `protobuf-go`'s generated code by a factor of 2-3x, especially for workloads with
 many nested messages.
 
-![Barchart of benchmarks for hyperpb](https://raw.githubusercontent.com/bufbuild/hyperpb-go/main/.github/benchmarks.svg)
+![Barchart of benchmarks for hyperpb](https://raw.githubusercontent.com/bufbuild/hyperpb-go/main/.github/benchmarks.png)
 
 Here, we show two benchmark variants for `hyperpb`: out-of-the-box performance with no optimizations turned on, and real-time profile-guided optimization (PGO) with all optimizations we currently offer enabled.
 
