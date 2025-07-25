@@ -16,7 +16,15 @@ many nested messages.
 
 ![Barchart of benchmarks for hyperpb](https://raw.githubusercontent.com/bufbuild/hyperpb-go/main/.github/benchmarks.svg)
 
-Here, we show two benchmark variants for `hyperpb`: out-of-the-box performance with no optimizations turned on, and real-time profile-guided optimization (PGO) with all optimizations we currently offer enabled.
+Here, we show two benchmark variants for `hyperpb`: out-of-the-box performance with no optimizations turned on, and real-time profile-guided optimization (PGO) with all optimizations we currently offer enabled. These benchmarks are a subset of the ones you can run
+using `make bench`.
+
+You can read about `hyperpb` on the Buf blog, or on project lead
+[Miguel](github.com/mcy)'s blog.
+
+* [Introducing hyperpb](https://buf.build/blog/hyperpb)
+* [Parsing Protobuf Like Never Before](https://mcyoung.xyz/2025/07/16/hyperpb)
+* [Cheating the Reaper in Go](https://mcyoung.xyz/2025/04/21/go-arenas/)
 
 ## Usage
 
