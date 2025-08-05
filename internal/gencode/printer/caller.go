@@ -12,6 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package repeated contains shared layouts for repeated field implementations,
-// for sharing between the tdp packages and the gencode packages.
-package repeated
+package printer
+
+import (
+	"runtime"
+	"strings"
+)
+
+var root = func() string {
+	_, f, _, ok := runtime.Caller(1)
+	if !ok {
+		return ""
+	}
+
+	f, ok = strings.CutSuffix(f, "internal/gencode/printer/caller.go")
+	if !ok {
+		panic("hyperpb: caller.go appears to have moved")
+	}
+
+	return f
+}()
+
+// Caller returns the file and line of its caller, adjusted for pretty-printing.
+//
+// Returns "", 0 if the binary was stripped.
+func Caller() (file string, line int) {
+	_, file, line, _ = runtime.Caller(1)
+	file = strings.TrimPrefix(file, root)
+	return file, line
+}

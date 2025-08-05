@@ -90,11 +90,6 @@ func (m *Message) Range(yield func(protoreflect.FieldDescriptor, protoreflect.Va
 			if v.Map().Len() == 0 {
 				goto skip
 			}
-
-		case fd.Message() != nil:
-			if _, empty := v.Interface().(empty.Message); empty {
-				goto skip
-			}
 		}
 
 		if !yield(ty.FieldDescriptors[i], v) {
@@ -129,10 +124,6 @@ func (m *Message) Has(fd protoreflect.FieldDescriptor) bool {
 	case fd.IsMap():
 		return v.Map().Len() > 0
 
-	case fd.Message() != nil:
-		_, empty := v.Interface().(empty.Message)
-		return !empty
-
 	default:
 		return true
 	}
@@ -152,9 +143,12 @@ func (m *Message) Get(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	}
 
 	if v := f.Get(unsafe.Pointer(m)); v.IsValid() {
-		// NOTE: non-scalar (message/repeated) fields always return a valid value.
+		// NOTE: non-singular fields always return a valid value.
 		return v
+	} else if fd.Cardinality() != protoreflect.Repeated && fd.Message() != nil {
+		return protoreflect.ValueOfMessage(empty.NewMessage(f.Message))
 	}
+
 	return fd.Default()
 }
 

@@ -28,8 +28,6 @@ import (
 // Strings is a repeated field containing strings.
 //
 // The elements are zero-copy ranges relative to a source pointer.
-//
-//nolint:recvcheck
 type Strings struct {
 	_ [0]string // Prevent sketchy casts.
 
@@ -38,21 +36,29 @@ type Strings struct {
 }
 
 // Len returns the length of this repeated field.
-func (s Strings) Len() int {
+func (s *Strings) Len() int {
+	if s == nil {
+		return 0
+	}
+
 	return s.Raw.Len()
 }
 
 // Get extracts a value at the given index.
 //
 // Panics if the index is out-of-bounds.
-func (s Strings) Get(n int) string {
+func (s *Strings) Get(n int) string {
 	r := s.Raw.Raw()[n]
 	return r.String(s.Src)
 }
 
 // Values returns an iterator over the elements of s.
-func (s Strings) Values() iter.Seq[string] {
+func (s *Strings) Values() iter.Seq[string] {
 	return func(yield func(string) bool) {
+		if s == nil {
+			return
+		}
+
 		for _, v := range s.Raw.Raw() {
 			if !yield(v.String(s.Src)) {
 				return
@@ -62,8 +68,12 @@ func (s Strings) Values() iter.Seq[string] {
 }
 
 // All returns an iterator over the indices and elements of s.
-func (s Strings) All() iter.Seq2[int, string] {
+func (s *Strings) All() iter.Seq2[int, string] {
 	return func(yield func(int, string) bool) {
+		if s == nil {
+			return
+		}
+
 		for i, v := range s.Raw.Raw() {
 			if !yield(i, v.String(s.Src)) {
 				return
@@ -74,11 +84,22 @@ func (s Strings) All() iter.Seq2[int, string] {
 
 // Copy copies these strings to a slice, appending to out.
 //
-// If copy is true, this will make defensive copies of the returned strings.
+// To get a fresh slice, pass nil to this function.
+func (s *Strings) Copy(out []string) []string {
+	return s.CopyAlias(out, false)
+}
+
+// Copy copies these strings to a slice, appending to out.
+//
+// If alias is true, this will not make defensive copies of the returned strings.
 //
 // To get a fresh slice, pass nil to this function.
-func (s Strings) Copy(out []string, copy bool) []string {
-	if !copy {
+func (s *Strings) CopyAlias(out []string, alias bool) []string {
+	if s == nil {
+		return out
+	}
+
+	if alias {
 		out = slices.Grow(out, s.Len())
 		for v := range s.Values() {
 			out = append(out, v)
@@ -108,3 +129,5 @@ func (s Strings) Copy(out []string, copy bool) []string {
 func (s *Strings) ProtoReflect() protoreflect.List {
 	return xunsafe.Cast[reflectStrings](s)
 }
+
+func (*Strings) Repeated(DoNotImplement) {}

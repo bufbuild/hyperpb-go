@@ -94,6 +94,13 @@ func GetRawPointer(v protoreflect.Value) unsafe.Pointer {
 	return unsafe.Pointer(unwrapValue(v).data)
 }
 
+// Is returns whether v contains a value of the given type.
+func Is[T any](v protoreflect.Value) bool {
+	r := unwrapValue(v)
+	var z T
+	return r.typ == xunsafe.AnyType(z)
+}
+
 // GetMessage extracts an message value out of a [protoreflect.Value].
 // This is faster than just calling v.Interface(), since that has a massive
 // type switch that performs slow sidecasts, rather than a direct downcast.

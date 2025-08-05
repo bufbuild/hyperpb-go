@@ -154,9 +154,10 @@ checkgenerate:
 	@# Used in CI to verify that `make generate` doesn't produce a diff.
 	git --no-pager diff --exit-code >&2
 
-internal/gen/*/*.pb.go: $(BIN)/buf internal/proto/*/*/*.proto internal/proto/*/*/*/*.proto
+internal/gen/*/*.pb.go: $(BIN)/buf internal/proto/*/*/*.proto internal/proto/*/*/*/*.proto internal/gencode/* internal/gencode/generator/*
 	$(BIN)/buf generate --clean
 	$(BIN)/buf generate --template buf.gen.vt.yaml
+	$(BIN)/buf generate --template buf.gen.hyperpb.yaml
 
 .PHONY: $(BIN)/hypertest
 $(BIN)/hypertest: generate

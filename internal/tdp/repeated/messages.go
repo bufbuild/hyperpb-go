@@ -21,6 +21,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"buf.build/go/hyperpb/internal/arena/slice"
+	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
@@ -32,16 +33,22 @@ import (
 // and outlined modes; the stride is zero in the latter case. We switch to the
 // outlined mode to avoid needing to copy parsed messages on slice resize.
 //
-// M *must* be some type which wraps a dynamic.Message.
-type Messages[M any] struct {
+// M *must* be some type which wraps a dynamic.Message, and P must be *M.
+type Messages[M any, P interface{ ProtoReflect() protoreflect.Message }] struct {
 	// Slice[byte] if stride is nonzero, Slice[*Message] otherwise.
 	Raw slice.Untyped
 	// The array stride for when raw is an inlined message list.
 	Stride uint32
 }
 
+type UntypedMessages = Messages[dynamic.Message, *dynamic.Message]
+
 // Len returns the length of this repeated field.
-func (m Messages[_]) Len() int {
+func (m *Messages[_, _]) Len() int {
+	if m == nil {
+		return 0
+	}
+
 	if m.Stride != 0 {
 		return int(m.Raw.Len) / int(m.Stride)
 	}
@@ -52,7 +59,7 @@ func (m Messages[_]) Len() int {
 // Get extracts a value at the given index.
 //
 // Panics if the index is out-of-bounds.
-func (m Messages[M]) Get(n int) *M {
+func (m *Messages[M, _]) Get(n int) *M {
 	if m.Stride != 0 {
 		xunsafe.BoundsCheck(n, int(m.Raw.Len)/int(m.Stride))
 
@@ -66,8 +73,12 @@ func (m Messages[M]) Get(n int) *M {
 }
 
 // Values returns an iterator over the elements of m.
-func (m Messages[M]) Values() iter.Seq[*M] {
+func (m *Messages[M, _]) Values() iter.Seq[*M] {
 	return func(yield func(*M) bool) {
+		if m == nil {
+			return
+		}
+
 		if m.Stride != 0 {
 			for k := 0; k < int(m.Raw.Len); k += int(m.Stride) {
 				p := xunsafe.ByteAdd[M](m.Raw.Ptr.AssertValid(), k)
@@ -86,8 +97,12 @@ func (m Messages[M]) Values() iter.Seq[*M] {
 }
 
 // All returns an iterator over the indices and elements of m.
-func (m Messages[M]) All() iter.Seq2[int, *M] {
+func (m *Messages[M, _]) All() iter.Seq2[int, *M] {
 	return func(yield func(int, *M) bool) {
+		if m == nil {
+			return
+		}
+
 		if m.Stride != 0 {
 			i := 0
 			for k := 0; k < int(m.Raw.Len); k += int(m.Stride) {
@@ -110,7 +125,11 @@ func (m Messages[M]) All() iter.Seq2[int, *M] {
 // Copy copies these scalars to a slice, appending to out.
 //
 // To get a fresh slice, pass nil to this function.
-func (m Messages[M]) Copy(out []*M) []*M {
+func (m *Messages[M, _]) Copy(out []*M) []*M {
+	if m == nil {
+		return out
+	}
+
 	if m.Stride == 0 {
 		return append(out, slice.CastUntyped[*M](m.Raw).Raw()...)
 	}
@@ -123,6 +142,8 @@ func (m Messages[M]) Copy(out []*M) []*M {
 }
 
 // ProtoReflect returns a reflection value for this list.
-func (m *Messages[M]) ProtoReflect() protoreflect.List {
-	return xunsafe.Cast[reflectMessages](m)
+func (m *Messages[M, P]) ProtoReflect() protoreflect.List {
+	return xunsafe.Cast[reflectMessages[M, P]](m)
 }
+
+func (*Messages[_, _]) Repeated(DoNotImplement) {}

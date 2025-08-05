@@ -35,19 +35,23 @@ type Zigzags[ZC, E tdp.Number] struct {
 }
 
 // IsZC returns whether this Scalars is in zero-copy mode.
-func (z Zigzags[ZC, E]) IsZC() bool {
+func (z *Zigzags[ZC, E]) IsZC() bool {
 	return z.Raw.OffArena()
 }
 
 // Len returns the length of this repeated field.
-func (z Zigzags[ZC, E]) Len() int {
+func (z *Zigzags[ZC, E]) Len() int {
+	if z == nil {
+		return 0
+	}
+
 	return int(z.Raw.Len)
 }
 
 // Get extracts a value at the given index.
 //
 // Panics if the index is out-of-bounds.
-func (z Zigzags[ZC, E]) Get(n int) E {
+func (z *Zigzags[ZC, E]) Get(n int) E {
 	if z.IsZC() {
 		r := slice.CastUntyped[ZC](z.Raw).Raw()
 		return zigzag.Decode(E(r[n]))
@@ -58,8 +62,12 @@ func (z Zigzags[ZC, E]) Get(n int) E {
 }
 
 // Values returns an iterator over the elements of s.
-func (z Zigzags[ZC, E]) Values() iter.Seq[E] {
+func (z *Zigzags[ZC, E]) Values() iter.Seq[E] {
 	return func(yield func(E) bool) {
+		if z == nil {
+			return
+		}
+
 		if z.IsZC() {
 			r := slice.CastUntyped[ZC](z.Raw).Raw()
 			for _, v := range r {
@@ -79,8 +87,12 @@ func (z Zigzags[ZC, E]) Values() iter.Seq[E] {
 }
 
 // All returns an iterator over the indices and elements of s.
-func (z Zigzags[ZC, E]) All() iter.Seq2[int, E] {
+func (z *Zigzags[ZC, E]) All() iter.Seq2[int, E] {
 	return func(yield func(int, E) bool) {
+		if z == nil {
+			return
+		}
+
 		if z.IsZC() {
 			r := slice.CastUntyped[ZC](z.Raw).Raw()
 			for i, v := range r {
@@ -102,7 +114,11 @@ func (z Zigzags[ZC, E]) All() iter.Seq2[int, E] {
 // Copy copies these scalars to a slice, appending to out.
 //
 // To get a fresh slice, pass nil to this function.
-func (z Zigzags[ZC, E]) Copy(out []E) []E {
+func (z *Zigzags[ZC, E]) Copy(out []E) []E {
+	if z == nil {
+		return out
+	}
+
 	out = slices.Grow(out, z.Len())
 	for v := range z.Values() {
 		out = append(out, v)
@@ -114,3 +130,5 @@ func (z Zigzags[ZC, E]) Copy(out []E) []E {
 func (s *Zigzags[ZC, E]) ProtoReflect() protoreflect.List {
 	return xunsafe.Cast[reflectZigzags[ZC, E]](s)
 }
+
+func (*Zigzags[_, _]) Repeated(DoNotImplement) {}
