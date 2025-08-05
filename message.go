@@ -209,7 +209,7 @@ func (m *Message) Initialized() error {
 		f := m.impl.Type().ByIndex(int(^idx))
 
 		switch v := f.Get(unsafe.Pointer(m)).Interface().(type) {
-		case empty.Message:
+		case nil:
 			continue
 		case *Message:
 			if err := v.Initialized(); err != nil {

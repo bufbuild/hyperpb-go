@@ -18,9 +18,9 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"buf.build/go/hyperpb/internal/tdp"
-	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/empty"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
+	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
 // reflectScalars wraps a repeated.Scalars so that it implements protoreflect.List.
@@ -119,20 +119,20 @@ func (r *reflectBytes) Get(n int) protoreflect.Value {
 }
 
 // reflectMessages wraps a repeated.Bytes so that it implements protoreflect.List.
-type reflectMessages struct {
+type reflectMessages[M any, P interface{ ProtoReflect() protoreflect.Message }] struct {
 	empty.List
-	raw Messages[dynamic.Message]
+	raw Messages[M, P]
 }
 
 // IsValid implements [protoreflect.List].
-func (r *reflectMessages) IsValid() bool { return r != nil }
+func (r *reflectMessages[M, _]) IsValid() bool { return r != nil }
 
 // Len implements [protoreflect.List].
-func (r *reflectMessages) Len() int {
+func (r *reflectMessages[M, _]) Len() int {
 	return r.raw.Len()
 }
 
 // Get implements [protoreflect.List].
-func (r *reflectMessages) Get(n int) protoreflect.Value {
-	return protoreflect.ValueOfMessage(r.raw.Get(n).ProtoReflect())
+func (r *reflectMessages[M, P]) Get(n int) protoreflect.Value {
+	return protoreflect.ValueOfMessage(xunsafe.BitCast[P](r.raw.Get(n)).ProtoReflect())
 }

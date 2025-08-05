@@ -25,8 +25,6 @@ import (
 )
 
 // Bools is a repeated field containing bools.
-//
-//nolint:recvcheck
 type Bools struct {
 	_ [0]bool // Prevent sketchy casts.
 
@@ -34,21 +32,29 @@ type Bools struct {
 }
 
 // Len returns the length of this repeated field.
-func (b Bools) Len() int {
+func (b *Bools) Len() int {
+	if b == nil {
+		return 0
+	}
+
 	return int(b.Raw.Len)
 }
 
 // Get extracts a value at the given index.
 //
 // Panics if the index is out-of-bounds.
-func (b Bools) Get(n int) bool {
+func (b *Bools) Get(n int) bool {
 	r := slice.CastUntyped[byte](b.Raw).Raw()[n]
 	return r != 0
 }
 
 // Values returns an iterator over the elements of s.
-func (b Bools) Values() iter.Seq[bool] {
+func (b *Bools) Values() iter.Seq[bool] {
 	return func(yield func(bool) bool) {
+		if b == nil {
+			return
+		}
+
 		for _, v := range slice.CastUntyped[byte](b.Raw).Raw() {
 			if !yield(v != 0) {
 				return
@@ -58,8 +64,12 @@ func (b Bools) Values() iter.Seq[bool] {
 }
 
 // All returns an iterator over the indices and elements of s.
-func (b Bools) All() iter.Seq2[int, bool] {
+func (b *Bools) All() iter.Seq2[int, bool] {
 	return func(yield func(int, bool) bool) {
+		if b == nil {
+			return
+		}
+
 		for i, v := range slice.CastUntyped[byte](b.Raw).Raw() {
 			if !yield(i, v != 0) {
 				return
@@ -71,7 +81,11 @@ func (b Bools) All() iter.Seq2[int, bool] {
 // Copy copies these bools to a slice, appending to out.
 //
 // To get a fresh slice, pass nil to this function.
-func (b Bools) Copy(out []bool) []bool {
+func (b *Bools) Copy(out []bool) []bool {
+	if b == nil {
+		return out
+	}
+
 	out = slices.Grow(out, b.Len())
 	for v := range b.Values() {
 		out = append(out, v)
@@ -83,3 +97,5 @@ func (b Bools) Copy(out []bool) []bool {
 func (b *Bools) ProtoReflect() protoreflect.List {
 	return xunsafe.Cast[reflectBools](b)
 }
+
+func (*Bools) Repeated(DoNotImplement) {}

@@ -40,19 +40,23 @@ type Scalars[ZC, E tdp.Number] struct {
 }
 
 // IsZC returns whether this Scalars is in zero-copy mode.
-func (s Scalars[ZC, E]) IsZC() bool {
+func (s *Scalars[ZC, E]) IsZC() bool {
 	return s.Raw.OffArena()
 }
 
 // Len returns the length of this repeated field.
-func (s Scalars[ZC, E]) Len() int {
+func (s *Scalars[ZC, E]) Len() int {
+	if s == nil {
+		return 0
+	}
+
 	return int(s.Raw.Len)
 }
 
 // Get extracts a value at the given index.
 //
 // Panics if the index is out-of-bounds.
-func (s Scalars[ZC, E]) Get(n int) E {
+func (s *Scalars[ZC, E]) Get(n int) E {
 	if s.IsZC() {
 		r := slice.CastUntyped[ZC](s.Raw).Raw()
 		return E(r[n])
@@ -63,8 +67,12 @@ func (s Scalars[ZC, E]) Get(n int) E {
 }
 
 // Values returns an iterator over the elements of s.
-func (s Scalars[ZC, E]) Values() iter.Seq[E] {
+func (s *Scalars[ZC, E]) Values() iter.Seq[E] {
 	return func(yield func(E) bool) {
+		if s == nil {
+			return
+		}
+
 		if s.IsZC() {
 			r := slice.CastUntyped[ZC](s.Raw).Raw()
 			for _, v := range r {
@@ -84,8 +92,12 @@ func (s Scalars[ZC, E]) Values() iter.Seq[E] {
 }
 
 // All returns an iterator over the indices and elements of s.
-func (s Scalars[ZC, E]) All() iter.Seq2[int, E] {
+func (s *Scalars[ZC, E]) All() iter.Seq2[int, E] {
 	return func(yield func(int, E) bool) {
+		if s == nil {
+			return
+		}
+
 		if s.IsZC() {
 			r := slice.CastUntyped[ZC](s.Raw).Raw()
 			for i, v := range r {
@@ -107,7 +119,11 @@ func (s Scalars[ZC, E]) All() iter.Seq2[int, E] {
 // Copy copies these scalars to a slice, appending to out.
 //
 // To get a fresh slice, pass nil to this function.
-func (s Scalars[ZC, E]) Copy(out []E) []E {
+func (s *Scalars[ZC, E]) Copy(out []E) []E {
+	if s == nil {
+		return out
+	}
+
 	if layout.Size[ZC]() == layout.Size[E]() || !s.IsZC() {
 		return append(out, slice.CastUntyped[E](s.Raw).Raw()...)
 	}
@@ -123,3 +139,5 @@ func (s Scalars[ZC, E]) Copy(out []E) []E {
 func (s *Scalars[ZC, E]) ProtoReflect() protoreflect.List {
 	return xunsafe.Cast[reflectScalars[ZC, E]](s)
 }
+
+func (*Scalars[_, _]) Repeated(DoNotImplement) {}

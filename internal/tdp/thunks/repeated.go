@@ -188,12 +188,12 @@ var repeatedFields = map[protoreflect.Kind]*compiler.Archetype{
 
 	// Message types.
 	protoreflect.MessageKind: {
-		Layout:  layout.Of[repeated.Messages[dynamic.Message]](),
+		Layout:  layout.Of[repeated.UntypedMessages](),
 		Getter:  getRepeatedMessage,
 		Parsers: []compiler.Parser{{Kind: protowire.BytesType, Retry: true, Thunk: parseRepeatedMessage}},
 	},
 	protoreflect.GroupKind: {
-		Layout:  layout.Of[repeated.Messages[dynamic.Message]](),
+		Layout:  layout.Of[repeated.UntypedMessages](),
 		Getter:  getRepeatedMessage,
 		Parsers: []compiler.Parser{{Kind: protowire.StartGroupType, Retry: true, Thunk: parseRepeatedGroup}},
 	},

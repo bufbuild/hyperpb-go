@@ -27,7 +27,7 @@ import (
 )
 
 func getRepeatedMessage(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) protoreflect.Value {
-	p := dynamic.GetField[repeated.Messages[dynamic.Message]](m, getter.Offset)
+	p := dynamic.GetField[repeated.UntypedMessages](m, getter.Offset)
 	return protoreflect.ValueOfList(p.ProtoReflect())
 }
 
@@ -60,8 +60,8 @@ func allocRepeatedMessageSplit(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, *dynamic.Messa
 
 //go:nosplit
 func allocRepeatedMessage2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, *dynamic.Message) {
-	var r *repeated.Messages[dynamic.Message]
-	p1, p2, r = vm.GetMutableField[repeated.Messages[dynamic.Message]](p1, p2)
+	var r *repeated.UntypedMessages
+	p1, p2, r = vm.GetMutableField[repeated.UntypedMessages](p1, p2)
 	p1.Log(p2, "repeated message", "%v", r.Raw)
 
 	var m *dynamic.Message
@@ -115,7 +115,7 @@ pointers:
 }
 
 //go:noinline
-func newInlineRepeatedField(p1 vm.P1, p2 vm.P2, r *repeated.Messages[dynamic.Message]) (vm.P1, vm.P2, *repeated.Messages[dynamic.Message]) {
+func newInlineRepeatedField(p1 vm.P1, p2 vm.P2, r *repeated.UntypedMessages) (vm.P1, vm.P2, *repeated.UntypedMessages) {
 	// First element of this field. Allocate a byte array large enough to
 	// hold one element.
 	ty := p1.Shared().Library().AtOffset(p2.Field().Message.TypeOffset)
@@ -132,7 +132,7 @@ func newInlineRepeatedField(p1 vm.P1, p2 vm.P2, r *repeated.Messages[dynamic.Mes
 }
 
 //go:noinline
-func spillInlineRepeatedField(p1 vm.P1, p2 vm.P2, r *repeated.Messages[dynamic.Message]) (vm.P1, vm.P2) {
+func spillInlineRepeatedField(p1 vm.P1, p2 vm.P2, r *repeated.UntypedMessages) (vm.P1, vm.P2) {
 	ty := p1.Shared().Library().AtOffset(p2.Field().Message.TypeOffset)
 	stride := int(ty.Size)
 	s := slice.CastUntyped[byte](r.Raw)
@@ -155,8 +155,8 @@ func spillInlineRepeatedField(p1 vm.P1, p2 vm.P2, r *repeated.Messages[dynamic.M
 
 //go:noinline
 func appendOneMessage(p1 vm.P1, p2 vm.P2, m *dynamic.Message) (vm.P1, vm.P2, *dynamic.Message) {
-	var r *repeated.Messages[dynamic.Message]
-	p1, p2, r = vm.GetMutableField[repeated.Messages[dynamic.Message]](p1, p2)
+	var r *repeated.UntypedMessages
+	p1, p2, r = vm.GetMutableField[repeated.UntypedMessages](p1, p2)
 	s := slice.CastUntyped[xunsafe.Addr[dynamic.Message]](r.Raw)
 	r.Raw = s.AppendOne(p1.Arena(), xunsafe.AddrOf(m)).Addr().Untyped()
 	return p1, p2, m

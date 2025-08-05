@@ -23,7 +23,6 @@ import (
 	"buf.build/go/hyperpb/internal/tdp"
 	"buf.build/go/hyperpb/internal/tdp/compiler"
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
-	"buf.build/go/hyperpb/internal/tdp/empty"
 	"buf.build/go/hyperpb/internal/tdp/vm"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
 	"buf.build/go/hyperpb/internal/xunsafe"
@@ -246,12 +245,12 @@ func getBytes(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) protoreflec
 func getMessage(m *dynamic.Message, ty *tdp.Type, getter *tdp.Accessor) protoreflect.Value {
 	p := dynamic.GetField[*dynamic.Message](m, getter.Offset)
 	if p == nil {
-		return protoreflect.ValueOfMessage(empty.NewMessage(ty))
+		return protoreflect.Value{}
 	}
 
 	sub := *p
 	if sub == nil {
-		return protoreflect.ValueOfMessage(empty.NewMessage(ty))
+		return protoreflect.Value{}
 	}
 	return protoreflect.ValueOfMessage(sub.ProtoReflect())
 }
