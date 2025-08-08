@@ -33,19 +33,7 @@ func CompileFileDescriptorSet(fds *descriptorpb.FileDescriptorSet, messageName p
 	if err != nil {
 		return nil, err
 	}
-	desc, err := files.FindDescriptorByName(messageName)
-	if err != nil {
-		return nil, err
-	}
-	msgDesc, ok := desc.(protoreflect.MessageDescriptor)
-	if !ok {
-		return nil, protoregistry.NotFound
-	}
-
-	// Allow the caller to override the extension registry by placing our
-	// default registry first.
-	options = append([]CompileOption{WithExtensionsFromFiles(files)}, options...)
-	return CompileMessageDescriptor(msgDesc, options...), nil
+	return CompileProtoRegistryFiles(files, messageName, options...)
 }
 
 // CompileMessageDescriptor compiles a descriptor into a [MessageType], for optimized parsing.
@@ -66,6 +54,23 @@ func CompileMessageDescriptor(md protoreflect.MessageDescriptor, options ...Comp
 	ty.Library.Metadata = options
 
 	return wrapType(ty)
+}
+
+// CompileProtoRegistryFiles look's up a message with the given name using the supplied protobuf file registry, and compiles a type for it.
+func CompileProtoRegistryFiles(files *protoregistry.Files, messageName protoreflect.FullName, options ...CompileOption) (*MessageType, error) {
+	desc, err := files.FindDescriptorByName(messageName)
+	if err != nil {
+		return nil, err
+	}
+	msgDesc, ok := desc.(protoreflect.MessageDescriptor)
+	if !ok {
+		return nil, protoregistry.NotFound
+	}
+
+	// Allow the caller to override the extension registry by placing our
+	// default registry first.
+	options = append([]CompileOption{WithExtensionsFromFiles(files)}, options...)
+	return CompileMessageDescriptor(msgDesc, options...), nil
 }
 
 // backend implements the compiler backend interface.
