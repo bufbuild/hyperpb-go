@@ -79,5 +79,5 @@ func (t Tag) Format(s fmt.State, verb rune) {
 // Returns whether this tag is "too large", i.e., if it has more than 32 bits
 // when decoded.
 func (t Tag) Overflows() bool {
-	return bits.LeadingZeros64(uint64(t)) < (64 - 32 + 4)
+	return bits.LeadingZeros64(uint64(t)) < (64 - 32 - 4)
 }
