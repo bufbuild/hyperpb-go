@@ -10,4 +10,9 @@ func TestTagOverflows(t *testing.T) {
 	if tag.Overflows() {
 		t.Error("protowire.MaxValidNumber should not overflow")
 	}
+
+	tag = EncodeTag(protowire.MaxValidNumber+1, protowire.BytesType)
+	if !tag.Overflows() {
+		t.Error("protowire.MaxValidNumber+1 should overflow")
+	}
 }
