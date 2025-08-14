@@ -1,8 +1,9 @@
 package tdp
 
 import (
-	"google.golang.org/protobuf/encoding/protowire"
 	"testing"
+	
+	"google.golang.org/protobuf/encoding/protowire"
 )
 
 func TestTagOverflows(t *testing.T) {
