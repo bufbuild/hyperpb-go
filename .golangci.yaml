@@ -16,45 +16,48 @@ version: "2"
 linters:
   default: all
   disable:
-    - depguard          # We don't have import restrictions.
-    - dogsled           # Rejects correct code.
-    - dupl              # Lots of false positives.
-    - errname           # Our errors are named errXXX or ErrXXX.
-    - exhaustive        # Seemingly made of false positives.
-    - exhaustruct       # Listing every field is not idiomatic.
-    - forcetypeassert   # Covered by errcheck.
+    - depguard                  # We don't have import restrictions.
+    - dogsled                   # Rejects correct code.
+    - dupl                      # Lots of false positives.
+    - embeddedstructfieldcheck  # Struct field ordering is optimized to reduce padding.
+    - errname                   # Our errors are named errXXX or ErrXXX.
+    - exhaustive                # Seemingly made of false positives.
+    - exhaustruct               # Listing every field is not idiomatic.
+    - forcetypeassert           # Covered by errcheck.
 
-    - gochecknoglobals  # Several places require globals for performance (e.g. sync.Pool).
-    - gochecknoinits    # Ditto. ^
+    - gochecknoglobals          # Several places require globals for performance (e.g. sync.Pool).
+    - gochecknoinits            # Ditto. ^
 
-    - gocognit          # Dubious "cognitive overhead" quantification.
-    - gocyclo           # Cyclotomic analysis is redundant.
-    - funlen            # Ditto. ^
-    - cyclop            # Ditto. ^
-    - maintidx          # Ditto. ^
+    - gocognit                  # Dubious "cognitive overhead" quantification.
+    - gocyclo                   # Cyclotomic analysis is redundant.
+    - funlen                    # Ditto. ^
+    - cyclop                    # Ditto. ^
+    - maintidx                  # Ditto. ^
 
-    - rowserrcheck      # No SQL code.
-    - sqlclosecheck     # Ditto. ^
+    - rowserrcheck              # No SQL code.
+    - sqlclosecheck             # Ditto. ^
     
-    - nlreturn          # Generous whitespace violates house style.
-    - wsl               # Ditto. ^
+    - nlreturn                  # Generous whitespace violates house style.
+    - wsl                       # Ditto. ^
+    - wsl_v5                    # Ditto. ^
 
-    - predeclared       # Using predeclared names as variables is fine.
-    - revive            # Ditto. ^
+    - predeclared               # Using predeclared names as variables is fine.
+    - revive                    # Ditto. ^
 
-    - lll               # More trouble than it's worth.
-    - makezero          # Appending to non-empty slices is ok.
-    - nestif            # This encourages artificially breaking things up.
-    - nonamedreturns    # Named returns are awesome.
-    - unparam           # Getting rid of redundant params is often unhelpful.
-    - varnamelen        # Single letter names are fine. This is Go, after all.
-    - inamedparam       # Named params in interface signatures are not always necessary.
-    - ireturn           # "Accept interfaces, return structs" isn't ironclad.
-    - mnd               # Some unnamed constants are okay.
-    - protogetter       # Lots of false positives, Can't use getter to check if field is present.
-    - testpackage       # Internal tests are fine.
-    - wastedassign      # Not supported with generics.
-    - wrapcheck         # Don't always need to wrap errors.
+    - lll                       # More trouble than it's worth.
+    - makezero                  # Appending to non-empty slices is ok.
+    - nestif                    # This encourages artificially breaking things up.
+    - nonamedreturns            # Named returns are awesome.
+    - noinlineerr               # In-line error checks are an established pattern.
+    - unparam                   # Getting rid of redundant params is often unhelpful.
+    - varnamelen                # Single letter names are fine. This is Go, after all.
+    - inamedparam               # Named params in interface signatures are not always necessary.
+    - ireturn                   # "Accept interfaces, return structs" isn't ironclad.
+    - mnd                       # Some unnamed constants are okay.
+    - protogetter               # Lots of false positives, Can't use getter to check if field is present.
+    - testpackage               # Internal tests are fine.
+    - wastedassign              # Not supported with generics.
+    - wrapcheck                 # Don't always need to wrap errors.
 
   settings:
     errcheck: { check-type-assertions: true }
@@ -84,6 +87,14 @@ linters:
           # gosec reports a few minor issues in tests
           - dupword
           - gosec
+      - path: internal/tools/hyperdump/main.go
+        linters:
+          # use of os/exec.Command rather than os/exec.CommandContext
+          - noctx
+      - path: internal/tools/hypertest/exec.go
+        linters:
+          # use of os/exec.Command rather than os/exec.CommandContext
+          - noctx
 
       # Don't ban use of fmt.Errorf to create new errors, but the remaining
       # checks from err113 are useful.

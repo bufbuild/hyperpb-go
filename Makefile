@@ -31,7 +31,7 @@ LICENSE_IGNORE := testdata/
 
 GO_VERSION := go1.25.0
 BUF_VERSION := v1.56.0 # Keep in sync w/ .github/workflows/buf.yaml.
-LINT_VERSION := v2.1.6 # Keep in sync w/ .github/workflows/ci.yaml.
+LINT_VERSION := v2.4.0 # Keep in sync w/ .github/workflows/ci.yaml.
 
 GOOS_HOST := $(shell go env GOOS)
 GOARCH_HOST := $(shell go env GOARCH)
