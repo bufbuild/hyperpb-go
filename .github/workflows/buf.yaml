@@ -11,7 +11,7 @@ jobs:
   buf:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bufbuild/buf-action@v1
         with:
           version: 1.56.0 # Keep in sync with Makefile BUF_VERSION
