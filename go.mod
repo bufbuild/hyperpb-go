@@ -2,8 +2,6 @@ module buf.build/go/hyperpb
 
 go 1.24.0
 
-toolchain go1.25.0
-
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
 	buf.build/gen/go/bufbuild/hyperpb-examples/protocolbuffers/go v1.36.7-20250725192734-0dd56aa9cbbc.1
