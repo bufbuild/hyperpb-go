@@ -148,7 +148,7 @@ generate: internal/gen/*/*.pb.go $(BIN)/license-header ## Regenerate code and li
 
 .PHONY: upgrade
 upgrade: ## Upgrade dependencies
-	go mod edit -toolchain=$(GO_VERSION)
+	go get toolchain@none
 	go get -u -t ./...
 	go mod tidy -v
 
