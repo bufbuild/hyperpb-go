@@ -17,7 +17,7 @@ require (
 	golang.org/x/crypto v0.41.0
 	golang.org/x/term v0.34.0
 	golang.org/x/tools v0.36.0
-	google.golang.org/protobuf v1.36.7
+	google.golang.org/protobuf v1.36.9
 	gopkg.in/yaml.v3 v3.0.1
 )
 
