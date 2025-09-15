@@ -18,6 +18,7 @@ import (
 	"flag"
 	"fmt"
 	"runtime"
+	"sync"
 	"testing"
 
 	"google.golang.org/protobuf/proto"
@@ -54,66 +55,139 @@ func BenchmarkUnmarshal(b *testing.B) {
 	testdata.RunAll(b, func(b *testing.B, test *testdata.TestCase) {
 		b.Helper()
 
-		run := func(b *testing.B, specimen []byte) {
+		run := func(b *testing.B, specimens [][]byte) {
 			b.Helper()
 			b.Run("hyperpb", func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := hyperpb.NewMessage(test.Type.Fast)
 					_ = proto.Unmarshal(specimen, m)
 				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 			b.Run("zerocopy", func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := hyperpb.NewMessage(test.Type.Fast)
 					_ = m.Unmarshal(specimen, hyperpb.WithAllowAlias(true))
 				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 			b.Run("arena", func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
 				ctx := new(hyperpb.Shared)
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := ctx.NewMessage(test.Type.Fast)
 					_ = m.Unmarshal(specimen, hyperpb.WithAllowAlias(true))
 					ctx.Free()
 				}
+				b.SetBytes(totalBytes / int64(b.N))
+			})
+			b.Run("arena-w-pool", func(b *testing.B) {
+				b.ReportAllocs()
+				pool := sync.Pool{New: func() interface{} { return new(hyperpb.Shared) }}
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
+					ctx := pool.Get().(*hyperpb.Shared)
+					m := ctx.NewMessage(test.Type.Fast)
+					runtime.AddCleanup(m, func(ctx *hyperpb.Shared) {
+						ctx.Free()
+						pool.Put(ctx)
+					}, ctx)
+					_ = m.Unmarshal(specimen, hyperpb.WithAllowAlias(true))
+					ctx.Free()
+				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 			b.Run("pgo", func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
 				ctx := new(hyperpb.Shared)
 
 				// Warmup.
 				profile := test.Type.Fast.NewProfile()
-				for range 16 {
-					m := ctx.NewMessage(test.Type.Fast)
-					_ = m.Unmarshal(specimen,
-						hyperpb.WithAllowAlias(true),
-						hyperpb.WithRecordProfile(profile, 1.0),
-					)
-					ctx.Free()
+				for _, specimen := range specimens {
+					for range 16 {
+						m := ctx.NewMessage(test.Type.Fast)
+						_ = m.Unmarshal(specimen,
+							hyperpb.WithAllowAlias(true),
+							hyperpb.WithRecordProfile(profile, 1.0),
+						)
+						ctx.Free()
+					}
 				}
 				ty := test.Type.Fast.Recompile(profile)
 
 				o := hyperpb.WithAllowAlias(true)
 				b.ResetTimer()
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := ctx.NewMessage(ty)
 					_ = m.Unmarshal(specimen, o)
 					ctx.Free()
 				}
+				b.SetBytes(totalBytes / int64(b.N))
+			})
+			b.Run("pgo-w-pool", func(b *testing.B) {
+				b.ReportAllocs()
+				pool := sync.Pool{New: func() interface{} { return new(hyperpb.Shared) }}
+
+				// Warmup.
+				profile := test.Type.Fast.NewProfile()
+				for _, specimen := range specimens {
+					for range 16 {
+						ctx := pool.Get().(*hyperpb.Shared)
+						m := ctx.NewMessage(test.Type.Fast)
+						runtime.AddCleanup(m, func(ctx *hyperpb.Shared) {
+							ctx.Free()
+							pool.Put(ctx)
+						}, ctx)
+						_ = m.Unmarshal(specimen,
+							hyperpb.WithAllowAlias(true),
+							hyperpb.WithRecordProfile(profile, 1.0),
+						)
+					}
+				}
+				ty := test.Type.Fast.Recompile(profile)
+
+				o := hyperpb.WithAllowAlias(true)
+				b.ResetTimer()
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
+					ctx := pool.Get().(*hyperpb.Shared)
+					m := ctx.NewMessage(ty)
+					runtime.AddCleanup(m, func(ctx *hyperpb.Shared) {
+						ctx.Free()
+						pool.Put(ctx)
+					}, ctx)
+					_ = m.Unmarshal(specimen, o)
+				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 			b.Run("gencode", func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := test.Type.Gencode.New().Interface()
 					_ = proto.Unmarshal(specimen, m)
 				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 			b.Run("vtproto", func(b *testing.B) {
 				type vtMessage interface{ UnmarshalVTUnsafe([]byte) error }
@@ -122,29 +196,28 @@ func BenchmarkUnmarshal(b *testing.B) {
 				}
 
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := test.Type.Gencode.New().Interface().(vtMessage) //nolint:errcheck
 					_ = m.UnmarshalVTUnsafe(specimen)
 				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 			b.Run("dynamicpb", func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(len(specimen)))
-				for range b.N {
+				var totalBytes int64
+				for i := range b.N {
+					specimen := specimens[i%len(specimens)]
+					totalBytes += int64(len(specimen))
 					m := dynamicpb.NewMessage(test.Type.Gencode.Descriptor())
 					_ = proto.Unmarshal(specimen, m)
 				}
+				b.SetBytes(totalBytes / int64(b.N))
 			})
 		}
 
-		if len(test.Specimens) == 1 {
-			run(b, test.Specimens[0])
-			return
-		}
-
-		for _, specimen := range test.Specimens {
-			b.Run("", func(b *testing.B) { run(b, specimen) })
-		}
+		run(b, test.Specimens)
 	})
 }
