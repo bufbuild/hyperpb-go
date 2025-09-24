@@ -5,7 +5,7 @@ managed:
    - file_option: go_package_prefix
      value: buf.build/go/hyperpb/internal/gen
 plugins:
-  - remote: buf.build/community/planetscale-vtprotobuf
+  - remote: buf.build/community/planetscale-vtprotobuf:v0.6.0
     out: internal/gen
     opt: paths=source_relative
 inputs:

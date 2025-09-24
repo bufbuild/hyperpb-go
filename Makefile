@@ -29,9 +29,9 @@ export GOBIN := $(abspath $(BIN))
 COPYRIGHT_YEARS := 2025
 LICENSE_IGNORE := testdata/
 
-GO_VERSION := go1.24.4
-BUF_VERSION := v1.50.0 # Keep in sync w/ .github/workflows/buf.yaml.
-LINT_VERSION := v2.1.6 # Keep in sync w/ .github/workflows/ci.yaml.
+GO_VERSION := go1.25.0
+BUF_VERSION := v1.56.0 # Keep in sync w/ .github/workflows/buf.yaml.
+LINT_VERSION := v2.4.0 # Keep in sync w/ .github/workflows/ci.yaml.
 
 GOOS_HOST := $(shell go env GOOS)
 GOARCH_HOST := $(shell go env GOARCH)
@@ -42,9 +42,9 @@ GOAMD64 ?=
 GOARM64 ?=
 
 HOST_ENV ?= GOTOOLCHAIN=local
-EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=local 
+EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=local
 
-# Go will carelessly pick these up on host-side builds if we don't unexport them. 
+# Go will carelessly pick these up on host-side builds if we don't unexport them.
 unexport GOOS
 unexport GOARCH
 
@@ -53,6 +53,7 @@ TESTFLAGS ?=
 BENCHFLAGS ?= -test.benchmem
 
 GO ?= go
+HOST_TARGET ?=
 GO_HOST := $(HOST_TARGET) $(GO)
 GO := $(EXEC_ENV) $(GO)
 TEST := $(EXEC_ENV) $(BIN)/hypertest -o $(TESTS) $(HYPERTESTFLAGS)
@@ -64,6 +65,8 @@ ASM_FILTER ?= ^buf.build/go/hyperpb
 ASM_INFO ?= fileline
 
 BENCHMARK ?= .
+
+PKG ?=
 ifeq ($(PKG),)
 	PKGS := ./...
 else
@@ -115,7 +118,7 @@ asm: build ## Generate assembly output for manual inspection
 		-nops \
 		-o hyperpb.s \
 		hyperpb.test
-	
+
 .PHONY: build
 build: generate ## Build all packages
 	$(GO) build -tags=$(TAGS) $(PKGS)
@@ -145,7 +148,7 @@ generate: internal/gen/*/*.pb.go $(BIN)/license-header ## Regenerate code and li
 
 .PHONY: upgrade
 upgrade: ## Upgrade dependencies
-	go mod edit -toolchain=$(GO_VERSION)
+	go get toolchain@none
 	go get -u -t ./...
 	go mod tidy -v
 
@@ -156,7 +159,7 @@ checkgenerate:
 
 internal/gen/*/*.pb.go: $(BIN)/buf internal/proto/*/*/*.proto internal/proto/*/*/*/*.proto
 	$(BIN)/buf generate --clean
-	$(BIN)/buf generate --template buf.gen.vt.yaml
+	$(BIN)/buf generate --template buf.vt.gen.yaml
 
 .PHONY: $(BIN)/hypertest
 $(BIN)/hypertest: generate
