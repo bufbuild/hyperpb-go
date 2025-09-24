@@ -280,7 +280,7 @@ func (p1 P1) Fixed64(p2 P2) (P1, P2, uint64) {
 
 // LengthPrefix parses a varint up to the current length.
 //
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (p1 P1) LengthPrefix(p2 P2) (P1, P2, int) {
 	if p1.Len() == 0 {
 		p1.Fail(p2, ErrorTruncated)
@@ -323,7 +323,7 @@ func (p1 P1) UTF8(p2 P2) (P1, P2, zc.Range) {
 
 // ParseMapEntry is a shim over [PushMessage] used for map entries.
 //
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (p1 P1) ParseMapEntry(p2 P2) (P1, P2) {
 	var n int
 	p1, p2, n = p1.LengthPrefix(p2)

@@ -8223,8 +8223,6 @@ insert:
 	p1.Log(p2, "slow map entry", "%d", n)
 	return p1.PushMapEntry(p2, v)
 }
-
-//go:nosplit
 func parseRepeatedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint8]
 	var n uint64
@@ -8262,8 +8260,6 @@ func parseRepeatedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	r.Raw = s.Addr().Untyped()
 	return p1, p2
 }
-
-//go:nosplit
 func parseRepeatedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint32]
 	var n uint64
@@ -8301,8 +8297,6 @@ func parseRepeatedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	r.Raw = s.Addr().Untyped()
 	return p1, p2
 }
-
-//go:nosplit
 func parseRepeatedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint64]
 	var n uint64
@@ -8341,7 +8335,6 @@ func parseRepeatedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
 //go:norace // Race instrumentation causes this function to fail the nosplit check.
 func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint8]
@@ -8471,7 +8464,6 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
 //go:norace // Race instrumentation causes this function to fail the nosplit check.
 func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint32]
@@ -8601,7 +8593,6 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
 //go:norace // Race instrumentation causes this function to fail the nosplit check.
 func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint64]
@@ -8731,7 +8722,6 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
 func appendFixed32(p1 vm.P1, p2 vm.P2, v uint32) (vm.P1, vm.P2) {
 	_ = appendFixed[uint32]
 	var r *repeated.Scalars[uint32, uint32]
@@ -8760,8 +8750,6 @@ func appendFixed32(p1 vm.P1, p2 vm.P2, v uint32) (vm.P1, vm.P2) {
 	r.Raw = s.Addr().Untyped()
 	return p1, p2
 }
-
-//go:nosplit
 func appendFixed64(p1 vm.P1, p2 vm.P2, v uint64) (vm.P1, vm.P2) {
 	_ = appendFixed[uint64]
 	var r *repeated.Scalars[uint64, uint64]
@@ -8791,7 +8779,6 @@ func appendFixed64(p1 vm.P1, p2 vm.P2, v uint64) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
 func parsePackedFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedFixed[uint32]
 	var n int
@@ -8849,8 +8836,6 @@ func parsePackedFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 exit:
 	return p1, p2
 }
-
-//go:nosplit
 func parsePackedFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedFixed[uint64]
 	var n int
@@ -8908,8 +8893,6 @@ func parsePackedFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 exit:
 	return p1, p2
 }
-
-//go:nosplit
 func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseVarint[uint32]
 	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
@@ -8920,8 +8903,6 @@ func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	return p1, p2
 }
-
-//go:nosplit
 func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseVarint[uint64]
 	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
@@ -8933,7 +8914,6 @@ func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
 func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint32]
 	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
@@ -8945,8 +8925,6 @@ func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	return p1, p2
 }
-
-//go:nosplit
 func parseZigZag64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint64]
 	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))

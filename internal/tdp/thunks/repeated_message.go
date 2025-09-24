@@ -31,7 +31,7 @@ func getRepeatedMessage(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) p
 	return protoreflect.ValueOfList(p.ProtoReflect())
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
 	p1, p2, n = p1.LengthPrefix(p2)
@@ -40,7 +40,7 @@ func parseRepeatedMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1.PushMessage(p2, m)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedGroup(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1, p2, m := allocRepeatedMessage(p1, p2)
 	return p1.PushGroup(p2, m)
@@ -58,7 +58,7 @@ func allocRepeatedMessageSplit(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, *dynamic.Messa
 	return allocRepeatedMessage2(p1, p2)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func allocRepeatedMessage2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, *dynamic.Message) {
 	var r *repeated.Messages[dynamic.Message]
 	p1, p2, r = vm.GetMutableField[repeated.Messages[dynamic.Message]](p1, p2)

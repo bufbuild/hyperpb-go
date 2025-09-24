@@ -167,7 +167,7 @@ func (a *Arena) Free() {
 
 // Grow allocates fresh memory onto next of at least the given size.
 //
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (a *Arena) Grow(size int) {
 	xunsafe.Escape(a)
 	p, n := a.allocChunk(max(size, a.Cap*2))

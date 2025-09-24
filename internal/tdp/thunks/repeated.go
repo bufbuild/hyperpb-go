@@ -224,7 +224,8 @@ func getRepeatedBytes(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) pro
 	return protoreflect.ValueOfList(p.ProtoReflect())
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
+//
 //hyperpb:stencil parseRepeatedVarint8 parseRepeatedVarint[uint8] appendVarint -> appendVarint8
 //hyperpb:stencil parseRepeatedVarint32 parseRepeatedVarint[uint32] appendVarint -> appendVarint32
 //hyperpb:stencil parseRepeatedVarint64 parseRepeatedVarint[uint64] appendVarint -> appendVarint64
@@ -267,7 +268,8 @@ func parseRepeatedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
+//
 //go:norace // Race instrumentation causes this function to fail the nosplit check.
 //hyperpb:stencil parsePackedVarint8 parsePackedVarint[uint8]
 //hyperpb:stencil parsePackedVarint32 parsePackedVarint[uint32]
@@ -418,7 +420,8 @@ func parseRepeatedFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return appendFixed64(p1.Fixed64(p2))
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
+//
 //hyperpb:stencil appendFixed32 appendFixed[uint32] spillArena -> spillArena32
 //hyperpb:stencil appendFixed64 appendFixed[uint64] spillArena -> spillArena64
 func appendFixed[T uint32 | uint64](p1 vm.P1, p2 vm.P2, v T) (vm.P1, vm.P2) {
@@ -450,7 +453,8 @@ func appendFixed[T uint32 | uint64](p1 vm.P1, p2 vm.P2, v T) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
+//
 //hyperpb:stencil parsePackedFixed32 parsePackedFixed[uint32]
 //hyperpb:stencil parsePackedFixed64 parsePackedFixed[uint64]
 func parsePackedFixed[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -512,7 +516,7 @@ exit:
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var v zc.Range
 	p1, p2, v = p1.Bytes(p2)
@@ -531,7 +535,7 @@ func parseRepeatedBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedUTF8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var v zc.Range
 	p1, p2, v = p1.UTF8(p2)
