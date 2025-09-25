@@ -43,7 +43,7 @@ func verifyUTF8(p1 P1, p2 P2, n int) (P1, P2, zc.Range) {
 	// and a remainder part that only does 0 to 7 bytes.
 	if e8 > p {
 	again:
-		bytes := *xunsafe.Cast[uint64](p.AssertValid())
+		bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 		p = p.Add(8)
 		if bytes&tdp.SignBits != 0 {
 			p = p.Add(-8) // Back up, need to take the slow path.
@@ -56,7 +56,8 @@ func verifyUTF8(p1 P1, p2 P2, n int) (P1, P2, zc.Range) {
 	if e > p {
 		// Fast path for if the last few bytes are also ASCII.
 		left := int(e - p)
-		bytes := *xunsafe.Cast[uint64](p.AssertValid())
+		bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
+
 		p = p.Add(left)
 		if bytes&(tdp.SignBits>>uint((8-left)*8)) != 0 {
 			p = p.Add(-left)
