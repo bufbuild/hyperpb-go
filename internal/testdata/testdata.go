@@ -152,6 +152,9 @@ func (test *TestCase) Run(t *testing.T, ctx *hyperpb.Shared, verbose bool) {
 		// Parse using hyperpb.
 		m2 := ctx.NewMessage(test.Type.Fast)
 		err2 := m2.Unmarshal(specimen, hyperpb.WithAllowAlias(true))
+		if err2 == nil {
+			err2 = m2.Initialized()
+		}
 
 		if verbose {
 			t.Logf("theirs: %v, ours: %v", err1, err2)
