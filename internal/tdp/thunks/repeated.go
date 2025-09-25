@@ -294,7 +294,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		e8 := p.Add(layout.RoundDown(int(e-p), 8))
 		if p < e8 {
 		again:
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & tdp.SignBits)
 			p = p.Add(8)
 			if p < e8 {
@@ -303,7 +303,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		}
 		if p < e {
 			left := int(e - p)
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & (tdp.SignBits >> uint((8-left)*8)))
 		}
 	}

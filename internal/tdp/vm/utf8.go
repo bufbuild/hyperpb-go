@@ -83,7 +83,7 @@ unicode:
 		n := min(8, int(e-p))
 		// Fast path for ASCII: simply check that all of the bytes don't have
 		// their sign bits set.
-		bytes := *xunsafe.Cast[uint64](p.AssertValid())
+		bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 		mask := uint64(tdp.SignBits) >> uint((8-n)*8)
 		ascii := bits.TrailingZeros64(bytes&mask) / 8
 		p1.Log(p2, "ascii bytes", "%016x, %d bytes", bytes, ascii)
@@ -115,7 +115,7 @@ unicode:
 		// Bounds check is complete here. We are free to load four bytes
 		// and mask off what we don't need. We can't re-use bytes here
 		// because the rune might straddle a boundary.
-		raw := *xunsafe.Cast[uint32](p.AssertValid())
+		raw := xunsafe.ByteLoad[uint32](p.AssertValid(), 0)
 		p1.Log(p2, "wide rune bits", "%08b, %d bytes", xunsafe.Bytes(&raw), count)
 
 		// This puts the contents of the first byte into r.

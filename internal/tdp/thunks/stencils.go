@@ -8354,7 +8354,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		e8 := p.Add(layout.RoundDown(int(e-p), 8))
 		if p < e8 {
 		again:
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & tdp.SignBits)
 			p = p.Add(8)
 			if p < e8 {
@@ -8363,7 +8363,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		}
 		if p < e {
 			left := int(e - p)
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & (tdp.SignBits >> uint((8-left)*8)))
 		}
 	}
@@ -8483,7 +8483,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		e8 := p.Add(layout.RoundDown(int(e-p), 8))
 		if p < e8 {
 		again:
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & tdp.SignBits)
 			p = p.Add(8)
 			if p < e8 {
@@ -8492,7 +8492,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		}
 		if p < e {
 			left := int(e - p)
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & (tdp.SignBits >> uint((8-left)*8)))
 		}
 	}
@@ -8612,7 +8612,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		e8 := p.Add(layout.RoundDown(int(e-p), 8))
 		if p < e8 {
 		again:
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & tdp.SignBits)
 			p = p.Add(8)
 			if p < e8 {
@@ -8621,7 +8621,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		}
 		if p < e {
 			left := int(e - p)
-			bytes := *xunsafe.Cast[uint64](p.AssertValid())
+			bytes := xunsafe.ByteLoad[uint64](p.AssertValid(), 0)
 			count += bits.OnesCount64(bytes & (tdp.SignBits >> uint((8-left)*8)))
 		}
 	}
@@ -8945,7 +8945,7 @@ func parseFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	}
 	var p *uint32
 	p1, p2, p = vm.GetMutableField[uint32](p1, p2)
-	*p = *xunsafe.Cast[uint32](p1.PtrAddr.AssertValid())
+	*p = xunsafe.ByteLoad[uint32](p1.PtrAddr.AssertValid(), 0)
 	p1 = p1.Advance(layout.Size[uint32]())
 
 	return p1, p2
@@ -8959,7 +8959,7 @@ func parseFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	}
 	var p *uint64
 	p1, p2, p = vm.GetMutableField[uint64](p1, p2)
-	*p = *xunsafe.Cast[uint64](p1.PtrAddr.AssertValid())
+	*p = xunsafe.ByteLoad[uint64](p1.PtrAddr.AssertValid(), 0)
 	p1 = p1.Advance(layout.Size[uint64]())
 
 	return p1, p2
