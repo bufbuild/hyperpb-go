@@ -16,6 +16,17 @@ type: hyperpb.test.Scalars
 protoscope:
 - '14: {`ff`}'
 
+- '14: {"a"}'
+- '14: {"ab"}'
+- '14: {"abc"}'
+- '14: {"abcd"}'
+- '14: {"abcde"}'
+- '14: {"abcdef"}'
+- '14: {"abcdefg"}'
+- '14: {"abcdefgh"}'
+- '14: {"abcdefghi"}'
+- '14: {"abcdefghij"}'
+
 # Various torn runes.
 - '14: {`c280`}'
 - '14: {`c2`}'

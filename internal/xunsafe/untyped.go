@@ -14,7 +14,9 @@
 
 package xunsafe
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 // ByteAdd adds the given offset to p, without scaling.
 //

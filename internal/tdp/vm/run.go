@@ -87,6 +87,7 @@ func Run(m *dynamic.Message, data []byte, options Options) (err error) {
 	p3.Options = options
 
 	data = RelocatePageBoundary(data, !p3.AllowAlias)
+
 	m.Shared.Src = unsafe.SliceData(data)
 	m.Shared.Len = len(data)
 	// The arena keeps m.context alive, so we don't need to KeepAlive src.
