@@ -458,6 +458,7 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 
 	switch ty {
 	case protowire.VarintType:
+		p1, p2 = p1.AtLeast(p2, 1)
 		p1, p2, _ = p1.Varint(p2)
 	case protowire.BytesType:
 		p1, p2, _ = p1.Bytes(p2)
