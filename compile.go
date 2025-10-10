@@ -33,7 +33,7 @@ func CompileFileDescriptorSet(fds *descriptorpb.FileDescriptorSet, messageName p
 	if err != nil {
 		return nil, err
 	}
-	return CompileProtoRegistryFiles(files, messageName, options...)
+	return CompileFileRegistry(files, messageName, options...)
 }
 
 // CompileMessageDescriptor compiles a descriptor into a [MessageType], for optimized parsing.
@@ -56,8 +56,11 @@ func CompileMessageDescriptor(md protoreflect.MessageDescriptor, options ...Comp
 	return wrapType(ty)
 }
 
-// CompileProtoRegistryFiles look's up a message with the given name using the supplied protobuf file registry, and compiles a type for it.
-func CompileProtoRegistryFiles(files *protoregistry.Files, messageName protoreflect.FullName, options ...CompileOption) (*MessageType, error) {
+// CompileFileRegistry looks up a [protoreflect.MessageDescriptor] from a [protoregistry.Files] and
+// compiles a [MessageType] for it.
+//
+// Returns an error if no message type exists in the registry with that name.
+func CompileFileRegistry(files *protoregistry.Files, messageName protoreflect.FullName, options ...CompileOption) (*MessageType, error) {
 	desc, err := files.FindDescriptorByName(messageName)
 	if err != nil {
 		return nil, err
