@@ -47,6 +47,7 @@ type runner struct {
 	profile  bool     // If set, -cpuprofile will be set.
 	checkptr bool     // Whether to build with -c=checkptr.
 	race     bool     // Whether to build with -race.
+	unopt    bool     // Whether to build without optimizations.
 	args     []string // Args for the test binary(s).
 }
 
@@ -96,6 +97,9 @@ func (r *runner) build() ([]test, error) {
 	}
 	if r.race {
 		args = append(args, "-race")
+	}
+	if r.unopt {
+		args = append(args, "-gcflags=-N -l")
 	}
 
 	// Build the command we're going to run.

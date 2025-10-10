@@ -36,6 +36,7 @@ var (
 	remote   = flag.String("remote", "", "SSH remote to run tests at")
 	checkptr = flag.Bool("checkptr", false, "build with checkptr (crappy asan) instrumentation")
 	race     = flag.Bool("race", false, "build with -race")
+	unopt    = flag.Bool("unopt", false, "build with optimizations turned off")
 
 	benchCsv   = flag.String("csv", "", "file for benchmark csv output")
 	benchTable = flag.String("table", "", "file for benchmark table output")
@@ -65,6 +66,7 @@ func run() error {
 		profile:  *profile,
 		checkptr: *checkptr,
 		race:     *race,
+		unopt:    *unopt,
 		args:     flag.Args(),
 	}
 

@@ -256,7 +256,8 @@ func getMessage(m *dynamic.Message, ty *tdp.Type, getter *tdp.Accessor) protoref
 	return protoreflect.ValueOfMessage(sub.ProtoReflect())
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
+//
 //hyperpb:stencil parseVarint32 parseVarint[uint32] StoreFromScratch -> StoreFromScratch32
 //hyperpb:stencil parseVarint64 parseVarint[uint64] StoreFromScratch -> StoreFromScratch64
 func parseVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -269,7 +270,8 @@ func parseVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
+//
 //hyperpb:stencil parseZigZag32 parseZigZag[uint32] StoreFromScratch -> StoreFromScratch32
 //hyperpb:stencil parseZigZag64 parseZigZag[uint64] StoreFromScratch -> StoreFromScratch64
 func parseZigZag[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -298,7 +300,7 @@ func parseFixed[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseString(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var r zc.Range
 	p1, p2, r = p1.UTF8(p2)
@@ -311,7 +313,7 @@ func parseString(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var r zc.Range
 	p1, p2, r = p1.Bytes(p2)
@@ -324,7 +326,7 @@ func parseBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
 	p1, p2, n = p1.Varint(p2)
@@ -333,7 +335,7 @@ func parseBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1, p2
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
 	p1, p2, n = p1.LengthPrefix(p2)
@@ -350,7 +352,7 @@ func parseMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return p1.PushMessage(p2, m)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseGroup(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var mp **dynamic.Message
 	p1, p2, mp = vm.GetMutableField[*dynamic.Message](p1, p2)

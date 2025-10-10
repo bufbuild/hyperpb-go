@@ -20,7 +20,7 @@ Here, we show two benchmark variants for `hyperpb`: out-of-the-box performance w
 using `make bench`.
 
 You can read about `hyperpb` on the Buf blog, or on project lead
-[Miguel](github.com/mcy)'s blog.
+[Miguel](https://github.com/mcy)'s blog.
 
 * [Introducing hyperpb](https://buf.build/blog/hyperpb)
 * [Parsing Protobuf Like Never Before](https://mcyoung.xyz/2025/07/16/hyperpb)

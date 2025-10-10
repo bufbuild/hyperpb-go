@@ -28,7 +28,7 @@ import (
 //
 // Fails the parse if validation fails.
 //
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func verifyUTF8(p1 P1, p2 P2, n int) (P1, P2, zc.Range) {
 	if n == 0 {
 		return p1, p2, 0

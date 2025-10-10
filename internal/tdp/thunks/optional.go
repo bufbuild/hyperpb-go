@@ -232,7 +232,7 @@ func parseOptionalBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	return parseBytes(p1, p2)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseOptionalBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
 	p1, p2, n = p1.Varint(p2)

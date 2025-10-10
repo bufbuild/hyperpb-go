@@ -674,33 +674,33 @@ func (fixed64Item) kind() protowire.Type  { return protowire.Fixed64Type }
 func (stringItem) kind() protowire.Type   { return protowire.BytesType }
 func (bytesItem) kind() protowire.Type    { return protowire.BytesType }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (varint32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
 	var n uint64
 	p1, p2, n = p1.Varint(p2)
 	return p1, p2, uint32(n)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (varint64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
 	return p1.Varint(p2)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (zigzag32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
 	var n uint64
 	p1, p2, n = p1.Varint(p2)
 	return p1, p2, zigzag.Decode64[uint32](n)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (zigzag64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
 	var n uint64
 	p1, p2, n = p1.Varint(p2)
 	return p1, p2, zigzag.Decode64[uint64](n)
 }
 
-//go:nosplit
+// //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (boolItem) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint8) {
 	var n uint64
 	p1, p2, n = p1.Varint(p2)

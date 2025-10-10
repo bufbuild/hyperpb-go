@@ -8,7 +8,7 @@ managed:
   - file_option: go_package
     module: buf.build/bufbuild/protovalidate
 plugins:
-  - remote: buf.build/protocolbuffers/go
+  - remote: buf.build/protocolbuffers/go:v1.36.9
     out: internal/gen
     opt: paths=source_relative
 inputs:
