@@ -18,6 +18,8 @@ syntax = "proto3";
 // buf:lint:ignore PACKAGE_DIRECTORY_MATCH
 package hyperpb.test;
 
+import "google/protobuf/descriptor.proto";
+
 enum Enum {
   ENUM_UNSPECIFIED = 0;
   ENUM_1 = 1;
@@ -362,4 +364,13 @@ message Pathological {
   }
 
   repeated Inner x = 1;
+}
+
+message ExtendedMessage {
+  int32 extended_field = 1 [(option_max_field_number) = "test"];
+}
+
+extend google.protobuf.FieldOptions {
+  // Ensure that we can safely handle protowire.MaxValidNumber
+  string option_max_field_number = 536870911;
 }
