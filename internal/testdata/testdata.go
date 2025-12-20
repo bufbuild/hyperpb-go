@@ -151,7 +151,10 @@ func (test *TestCase) Run(t *testing.T, ctx *hyperpb.Shared, verbose bool) {
 
 		// Parse using hyperpb.
 		m2 := ctx.NewMessage(test.Type.Fast)
-		err2 := proto.Unmarshal(specimen, m2)
+		err2 := m2.Unmarshal(specimen, hyperpb.WithAllowAlias(true))
+		if err2 == nil {
+			err2 = m2.Initialized()
+		}
 
 		if verbose {
 			t.Logf("theirs: %v, ours: %v", err1, err2)
@@ -263,7 +266,50 @@ func parseTestCase(t testing.TB, path string, file []byte) *TestCase {
 			// making sure we have optimal message placement before we start.
 			test.Specimens[i] = vm.RelocatePageBoundary(test.Specimens[i], false)
 		}
+	} else {
+		// Ensure that each specimen is at the end of an allocation.
+		for n, b := range test.Specimens {
+			test.Specimens[n] = snapBytes(b)
+		}
 	}
 
 	return test
+}
+
+// snapBytes makes a copy of b such that b is at the end of a Go allocation.
+//
+// The Go allocator allocates objects on slabs (which it calls runtime.mspans),
+// which are large page-sized chunks divided into small pieces of the same size.
+// The sizes the Go allocator uses for slab objects are called size classes.
+//
+// This function discovers size classes using append(), which, when resizing,
+// always returns a slice whose capacity is a size class.
+//
+// This is used to trigger various checkptr corner cases in tests.
+func snapBytes(b []byte) []byte {
+	// Build a slice that is sized to a Go size class.
+	//
+	// This append lowers to a call to runtime.growslice, and, because
+	// sizeof(byte) == 1, triggers this bit of code at
+	// https://cs.opensource.google/go/go/+/refs/tags/go1.25.1:src/runtime/slice.go;l=210:
+	//
+	// 	lenmem = uintptr(oldLen)
+	// 	newlenmem = uintptr(newLen)
+	// 	capmem = roundupsize(uintptr(newcap), noscan)
+	// 	overflow = uintptr(newcap) > maxAlloc
+	// 	newcap = int(capmem)
+	//
+	// runtime.roundupsize(n, noscan) rounds n up to the next size class
+	// larger ot equal to it.
+	//
+	// We always round up the size class to at least 32, to avoid very tiny
+	// objects that share allocations.
+	buf := append([]byte(nil), make([]byte, max(32, len(b)))...)
+	buf = buf[:cap(buf):cap(buf)]
+
+	// Discard everything excelt the last len(b) bytes of buf.
+	buf = buf[len(buf)-len(b):]
+
+	copy(buf, b)
+	return buf
 }

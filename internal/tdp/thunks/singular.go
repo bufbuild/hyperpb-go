@@ -294,7 +294,7 @@ func parseFixed[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	}
 	var p *T
 	p1, p2, p = vm.GetMutableField[T](p1, p2)
-	*p = *xunsafe.Cast[T](p1.PtrAddr.AssertValid())
+	*p = xunsafe.ByteLoad[T](p1.PtrAddr.AssertValid(), 0)
 	p1 = p1.Advance(layout.Size[T]())
 
 	return p1, p2
