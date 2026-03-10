@@ -20,10 +20,14 @@ import (
 	"buf.build/go/hyperpb/internal/debug"
 )
 
+// Overridable at runtime, if good SIMD features are detected.
+var parseVarint = parseVarintScalar
+
 // parseVarint is the core varint parsing implementation.
 //
 //go:nosplit
-func parseVarint(p1 P1, p2 P2) (P1, P2, uint64) {
+//go:noinline
+func parseVarintScalar(p1 P1, p2 P2) (P1, P2, uint64) {
 	// Inlined from protowire.ConsumeVarint to minimize spills and remove
 	// bounds checks.
 	var b byte
@@ -177,5 +181,10 @@ fail:
 
 //go:noinline
 func parseVarintNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
+	return parseVarint(p1, p2)
+}
+
+//go:noinline
+func parseVarintScalarNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
 	return parseVarint(p1, p2)
 }

@@ -44,13 +44,13 @@ const pageBoundary = 0x1000
 func RelocatePageBoundary(data []byte, force bool) []byte {
 	if !force {
 		// Check if there is capacity to spare.
-		if cap(data)-len(data) >= 9 {
+		if cap(data)-len(data) >= 15 {
 			return data
 		}
 
 		// If not, we need to check if there is a page boundary beyond this
 		// slice.
-		if xunsafe.EndOf(data).Padding(pageBoundary) >= 9 {
+		if xunsafe.EndOf(data).Padding(pageBoundary) >= 15 {
 			// All good, we have nine or more bytes ahead of us before the next
 			// page boundary.
 			return data

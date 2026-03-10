@@ -29,7 +29,7 @@ export GOBIN := $(abspath $(BIN))
 COPYRIGHT_YEARS := 2025
 LICENSE_IGNORE := testdata/
 
-GO_VERSION := go1.25.0
+GO_VERSION := go1.26.1
 BUF_VERSION := v1.56.0 # Keep in sync w/ .github/workflows/buf.yaml.
 LINT_VERSION := v2.4.0 # Keep in sync w/ .github/workflows/ci.yaml.
 
@@ -41,8 +41,11 @@ GOARCH ?=
 GOAMD64 ?=
 GOARM64 ?=
 
-HOST_ENV ?= GOTOOLCHAIN=local
-EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=local
+GOTOOLCHAIN ?= local
+GOEXPERIMENT ?= simd
+
+HOST_ENV ?= GOTOOLCHAIN=$(GOTOOLCHAIN) GOEXPERIMENT=$(GOEXPERIMENT)
+EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=$(GOTOOLCHAIN) GOEXPERIMENT=$(GOEXPERIMENT)
 
 # Go will carelessly pick these up on host-side builds if we don't unexport them.
 unexport GOOS
@@ -122,6 +125,11 @@ asm: build ## Generate assembly output for manual inspection
 .PHONY: build
 build: generate ## Build all packages
 	$(GO) build -tags=$(TAGS) $(PKGS)
+
+.PHONY: show-env
+show-env: ## Print the Go tool's interpreted environment.
+	go version
+	$(GO) env
 
 .PHONY: lint
 lint: $(BIN)/golangci-lint ## Lint
