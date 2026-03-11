@@ -186,5 +186,5 @@ func parseVarintNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
 
 //go:noinline
 func parseVarintScalarNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
-	return parseVarint(p1, p2)
+	return parseVarintScalar(p1, p2)
 }
