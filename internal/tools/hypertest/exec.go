@@ -212,36 +212,48 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 	fmt.Printf("created remote tempdir: %s\n", tmpdir)
 
 	// Upload all of the tests in parallel.
-	sftp, err := ssh.NewSftp()
-	if err != nil {
-		return "", err
-	}
 	wg := new(sync.WaitGroup)
 	syncErr := new(atomic.Pointer[error])
 	for _, test := range tests {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			var err error
 			{
 				fmt.Printf("uploading %s...\n", test.binary(r, ""))
 				start := time.Now()
-				src, err := os.Open(test.binary(r, ""))
+				var src *os.File
+				src, err = os.Open(test.binary(r, ""))
 				if err != nil {
 					goto error
 				}
 				defer src.Close()
 
-				dst, err := sftp.Create(test.binary(r, tmpdir))
+				var cmd *goph.Cmd
+				cmd, err = ssh.Command("tee", test.binary(r, tmpdir))
 				if err != nil {
+					err = fmt.Errorf("exec: tee: %w", err)
 					goto error
 				}
-				defer dst.Close()
+				cmd.Stdout = nil
+				cmd.Stdin = src
+				cmd.Stderr = os.Stderr
 
-				if err := dst.Chmod(0o777); err != nil {
+				err = cmd.Run()
+				if err != nil {
+					err = fmt.Errorf("exec: tee: %w", err)
 					goto error
 				}
 
-				if _, err := io.Copy(dst, src); err != nil {
+				cmd, err = ssh.Command("chmod", "+x", test.binary(r, tmpdir))
+				if err != nil {
+					err = fmt.Errorf("exec: chmod: %w", err)
+					goto error
+				}
+				cmd.Stderr = os.Stderr
+				err = cmd.Run()
+				if err != nil {
+					err = fmt.Errorf("exec: chmod: %w", err)
 					goto error
 				}
 
@@ -249,11 +261,17 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 				return
 			}
 		error:
+			if err == nil {
+				panic("got spurious nil error")
+			}
 			syncErr.CompareAndSwap(nil, &err)
 		}()
 	}
 	wg.Wait()
 	if err := syncErr.Load(); err != nil {
+		if *err == nil {
+			panic("got spurious nil error")
+		}
 		return "", *err
 	}
 
