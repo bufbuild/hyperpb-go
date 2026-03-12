@@ -223,6 +223,7 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 		go func() {
 			defer wg.Done()
 			{
+				fmt.Printf("uploading %s...\n", test.binary(r, ""))
 				start := time.Now()
 				src, err := os.Open(test.binary(r, ""))
 				if err != nil {

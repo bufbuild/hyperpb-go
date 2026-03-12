@@ -38,31 +38,6 @@ func AVX32(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
 	var x uint64
 
 	{
-		// Fast paths from the scalar variant.
-		var b byte
-		var i int
-		b = *p1.PtrAddr.AssertValid()
-		p1.PtrAddr++
-		x |= uint64(b) << (i * 7)
-		if int8(b) >= 0 {
-			goto exit
-		}
-		x -= 0x80 << (i * 7)
-		i++
-
-		if p1.PtrAddr == p1.EndAddr {
-			goto fail
-		}
-		b = *p1.PtrAddr.AssertValid()
-		p1.PtrAddr++
-		x |= uint64(b) << (i * 7)
-		if int8(b) >= 0 {
-			goto exit
-		}
-		x -= 0x80 << (i * 7)
-		i++
-
-		p1.PtrAddr -= 2
 
 		if p1.Len() < 16 {
 			return ScalarSplit(p1, p2)
@@ -116,7 +91,6 @@ func AVX32(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
 		p1.PtrAddr = p1.PtrAddr.Add(len)
 	}
 
-exit:
 	if debug.Enabled {
 		len := int(p1.PtrAddr - start)
 		p1.Log(p2, "varint-avx", "%d:%#x (%d bytes)", x, x, len)
@@ -140,31 +114,6 @@ func AVX64(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
 	var x uint64
 
 	{
-		// Fast paths from the scalar variant.
-		var b byte
-		var i int
-		b = *p1.PtrAddr.AssertValid()
-		p1.PtrAddr++
-		x |= uint64(b) << (i * 7)
-		if int8(b) >= 0 {
-			goto exit
-		}
-		x -= 0x80 << (i * 7)
-		i++
-
-		if p1.PtrAddr == p1.EndAddr {
-			goto fail
-		}
-		b = *p1.PtrAddr.AssertValid()
-		p1.PtrAddr++
-		x |= uint64(b) << (i * 7)
-		if int8(b) >= 0 {
-			goto exit
-		}
-		x -= 0x80 << (i * 7)
-		i++
-
-		p1.PtrAddr -= 2
 
 		if p1.Len() < 16 {
 			return ScalarSplit(p1, p2)
@@ -218,7 +167,6 @@ func AVX64(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
 		p1.PtrAddr = p1.PtrAddr.Add(len)
 	}
 
-exit:
 	if debug.Enabled {
 		len := int(p1.PtrAddr - start)
 		p1.Log(p2, "varint-avx", "%d:%#x (%d bytes)", x, x, len)
