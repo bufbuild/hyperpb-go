@@ -28,14 +28,33 @@ package vm
 import (
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
-	"buf.build/go/hyperpb/internal/tdp/vm/internal/state"
-	"buf.build/go/hyperpb/internal/tdp/vm/varint"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/utf8"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/varint"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/zc"
 )
 
-type P1 = state.P1
-type P2 = state.P2
+// VM state types.
+type (
+	P1 = impl.P1
+	P2 = impl.P2
+)
+
+// Varint32 parses a 64-bit varint, but will perform less work by discarding
+// arbitrary high bits beyond bit 31.
+//
+//go:nosplit
+func Varint32(p1 P1, p2 P2) (P1, P2, uint64) {
+	return varint.Varint32(p1, p2)
+}
+
+// Varint64 parses a 64-bit varint.
+//
+//go:nosplit
+func Varint64(p1 P1, p2 P2) (P1, P2, uint64) {
+	return varint.Varint64(p1, p2)
+}
 
 // Fixed32 parses a 32-bit fixed-width integer.
 func Fixed32(p1 P1, p2 P2) (P1, P2, uint32) {
@@ -66,7 +85,7 @@ func LengthPrefix(p1 P1, p2 P2) (P1, P2, int) {
 	}
 
 	var n uint64
-	p1, p2, n = varint.Varint64(p1, p2)
+	p1, p2, n = Varint64(p1, p2)
 
 	// Explicit inlining of atLeast(). len() is guaranteed to fit in a
 	// uint32.
@@ -97,7 +116,7 @@ func UTF8(p1 P1, p2 P2) (P1, P2, zc.Range) {
 		return Bytes(p1, p2)
 	}
 
-	return verifyUTF8(LengthPrefix(p1, p2))
+	return utf8.Verify(LengthPrefix(p1, p2))
 }
 
 // ParseMapEntry is a shim over [PushMessage] used for map entries.

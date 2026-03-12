@@ -70,7 +70,7 @@ func StoreField[T any](p1 P1, p2 P2, v T) (P1, P2) {
 func StoreFromScratch[T tdp.Int](p1 P1, p2 P2) (P1, P2) {
 	var p unsafe.Pointer
 	p1, p2, p = getUntypedMutableField(p1, p2)
-	*(*T)(p) = T(p2.Scratch)
+	*(*T)(p) = T(p2.Scratch())
 	return p1, p2
 }
 

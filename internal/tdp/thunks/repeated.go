@@ -319,7 +319,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.Log(p2, "zc", "%v", r.Raw)
 
 			p1.PtrAddr = p1.EndAddr
-			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 			return p1, p2
 		}
 		s = s.Grow(p1.Arena(), count)
@@ -406,7 +406,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1.Log(p2, "append", "%v", s.Addr())
 
 	r.Raw = s.Addr().Untyped()
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 

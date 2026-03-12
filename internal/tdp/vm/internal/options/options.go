@@ -17,7 +17,7 @@ package options
 
 import "buf.build/go/hyperpb/internal/tdp/profile"
 
-// Options is options for [Run].
+// Options is options for the vm.
 type Options struct {
 	// Max tries before hitting the tag table.
 	MaxMisses int

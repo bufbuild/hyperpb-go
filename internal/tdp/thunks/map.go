@@ -26,7 +26,6 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/maps"
 	"buf.build/go/hyperpb/internal/tdp/vm"
-	"buf.build/go/hyperpb/internal/tdp/vm/varint"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
@@ -678,33 +677,33 @@ func (bytesItem) kind() protowire.Type    { return protowire.BytesType }
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (varint32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
 	var n uint64
-	p1, p2, n = varint.Varint32(p1, p2)
+	p1, p2, n = vm.Varint32(p1, p2)
 	return p1, p2, uint32(n)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (varint64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
-	return varint.Varint64(p1, p2)
+	return vm.Varint64(p1, p2)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (zigzag32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
 	var n uint64
-	p1, p2, n = varint.Varint32(p1, p2)
+	p1, p2, n = vm.Varint32(p1, p2)
 	return p1, p2, zigzag.Decode64[uint32](n)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (zigzag64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
 	var n uint64
-	p1, p2, n = varint.Varint64(p1, p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 	return p1, p2, zigzag.Decode64[uint64](n)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (boolItem) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint8) {
 	var n uint64
-	p1, p2, n = varint.Varint32(p1, p2)
+	p1, p2, n = vm.Varint32(p1, p2)
 	if n != 0 {
 		n = 1
 	}
@@ -890,7 +889,7 @@ func parseMapKxV[
 	// afford to call varint() each time we parse a tag.
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -933,7 +932,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 
@@ -993,7 +992,7 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 	// afford to call varint() each time we parse a tag.
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1045,7 +1044,7 @@ insert:
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
 	// Unspill the old end pointer.
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	// Schedule a message parse.

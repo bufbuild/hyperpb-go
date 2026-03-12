@@ -21,7 +21,7 @@ import (
 
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
-	"buf.build/go/hyperpb/internal/tdp/vm/internal/state"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
 	"buf.build/go/hyperpb/internal/xsimd"
 )
 
@@ -29,7 +29,7 @@ import (
 // arbitrary high bits beyond bit 31.
 //
 //go:nosplit
-func Varint32(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+func Varint32(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	switch {
 	case xsimd.AVX():
 		if debug.Enabled {
@@ -47,7 +47,7 @@ func Varint32(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
 // Varint64 parses a 32-bit varint.
 //
 //go:nosplit
-func Varint64(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+func Varint64(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	switch {
 	case xsimd.AVX():
 		if debug.Enabled {
@@ -67,8 +67,7 @@ func Varint64(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
 //
 //go:nosplit
 //go:noinline
-func Scalar(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
-
+func Scalar(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	// Inlined from protowire.ConsumeVarint to minimize spills and remove
 	// bounds checks.
 	var b byte

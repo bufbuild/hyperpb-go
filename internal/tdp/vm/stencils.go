@@ -24,13 +24,13 @@ func StoreFromScratch32(p1 P1, p2 P2) (P1, P2) {
 	_ = StoreFromScratch[uint32]
 	var p unsafe.Pointer
 	p1, p2, p = getUntypedMutableField(p1, p2)
-	*(*uint32)(p) = uint32(p2.Scratch)
+	*(*uint32)(p) = uint32(p2.Scratch())
 	return p1, p2
 }
 func StoreFromScratch64(p1 P1, p2 P2) (P1, P2) {
 	_ = StoreFromScratch[uint64]
 	var p unsafe.Pointer
 	p1, p2, p = getUntypedMutableField(p1, p2)
-	*(*uint64)(p) = uint64(p2.Scratch)
+	*(*uint64)(p) = uint64(p2.Scratch())
 	return p1, p2
 }

@@ -16,12 +16,12 @@
 
 package varint
 
-import "buf.build/go/hyperpb/internal/tdp/vm/internal/state"
+import "buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
 
-func AVX32(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) /*{
+func AVX32(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) /*{
 	// Unimplemented, calling this function causes a linker error.
 }*/
 
-func AVX64(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) /*{
+func AVX64(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) /*{
 	// Unimplemented, calling this function causes a linker error.
 }*/

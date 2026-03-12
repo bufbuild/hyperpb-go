@@ -14,19 +14,19 @@
 
 package varint
 
-import "buf.build/go/hyperpb/internal/tdp/vm/internal/state"
+import "buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
 
 //go:noinline
-func ScalarSplit(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+func ScalarSplit(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	return Scalar(p1, p2)
 }
 
 //go:noinline
-func AVX32Split(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+func AVX32Split(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	return AVX32(p1, p2)
 }
 
 //go:noinline
-func AVX64Split(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+func AVX64Split(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	return AVX64(p1, p2)
 }

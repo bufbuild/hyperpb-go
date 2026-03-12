@@ -12,24 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vm
+package utf8
 
 import (
 	"math/bits"
 
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
 	"buf.build/go/hyperpb/internal/zc"
 )
 
-// verifyUTF8 validates that the next n bytes after p1.Ptr() are valid UTF-8.
+// Verify validates that the next n bytes after p1.Ptr() are valid UTF-8.
 //
 // Fails the parse if validation fails.
 //
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
-func verifyUTF8(p1 P1, p2 P2, n int) (P1, P2, zc.Range) {
+func Verify(p1 impl.P1, p2 impl.P2, n int) (impl.P1, impl.P2, zc.Range) {
 	if n == 0 {
 		return p1, p2, 0
 	}

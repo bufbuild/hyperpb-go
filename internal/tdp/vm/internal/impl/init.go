@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package state
+package impl
 
 import (
 	"fmt"
@@ -22,73 +22,69 @@ import (
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/options"
 	"buf.build/go/hyperpb/internal/tdp/vm/memory"
-	"buf.build/go/hyperpb/internal/tdp/vm/options"
 	"buf.build/go/hyperpb/internal/xsync"
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
 var (
-	stackPool = xsync.Pool[[]Frame]{}
+	stackPool = xsync.Pool[[]frame]{}
 	p3Pool    = xsync.Pool[P3]{
 		Reset: func(pp *P3) { *pp = P3{} },
 	}
 )
 
-// P3 is parser state that is passed behind a pointer.
-type P3 struct {
-	_ xunsafe.NoCopy
-
-	Err   tdp.Error
-	Stack struct {
-		Ptr         xunsafe.Addr[Frame]
-		Top, Bottom xunsafe.Addr[Frame]
-	}
-
-	Type xunsafe.Addr[tdp.TypeParser]
-	options.Options
-
-	Frames *[]Frame
-}
-
-// Frame is a recursion frame for the parser.
-type Frame struct {
-	End     xunsafe.Addr[byte]
-	Group   tdp.Tag
-	Message xunsafe.Addr[dynamic.Message]
-	Type    xunsafe.Addr[tdp.TypeParser]
-	Field   xunsafe.Addr[tdp.FieldParser]
-}
-
-func NewP3(data []byte, shared *dynamic.Shared, options *options.Options) *P3 {
-	shared.Lock.Lock()
+// New creates new VM state.
+//
+// Make sure to defer [Done] after calling this function.
+func New(data []byte, m *dynamic.Message, options *options.Options) (P1, P2) {
+	m.Shared.Lock.Lock()
 
 	p3 := p3Pool.Get()
 	p3.Options = *options
 
-	data = memory.RelocatePageBoundary(data, !p3.AllowAlias)
-	shared.Src = unsafe.SliceData(data)
-	shared.Len = len(data)
+	data = memory.RelocatePageBoundary(data, !p3.AllowAlias, 15)
+	m.Shared.Src = unsafe.SliceData(data)
+	m.Shared.Len = len(data)
 	// The arena keeps m.context alive, so we don't need to KeepAlive src.
 
-	p3.Frames = stackPool.Get()
-	if cap(*p3.Frames) < p3.MaxDepth {
-		*p3.Frames = make([]Frame, p3.MaxDepth)
+	p3.frames = stackPool.Get()
+	if cap(*p3.frames) < p3.MaxDepth {
+		*p3.frames = make([]frame, p3.MaxDepth)
 	}
 
-	p3.Stack.Top = xunsafe.AddrOf(unsafe.SliceData(*p3.Frames))
-	p3.Stack.Bottom = p3.Stack.Top.Add(p3.MaxDepth)
+	p3.stack.top = xunsafe.AddrOf(unsafe.SliceData(*p3.frames))
+	p3.stack.bottom = p3.stack.top.Add(p3.MaxDepth)
 
-	p3.Stack.Ptr = p3.Stack.Bottom
+	p3.stack.ptr = p3.stack.bottom
 
-	return p3
+	p1 := P1{
+		shared:  xunsafe.AddrOf(m.Shared),
+		PtrAddr: xunsafe.AddrOf(m.Shared.Src),
+	}
+	p2 := P2{
+		p3Addr: xunsafe.AddrOf(p3),
+	}
+
+	if debug.Enabled {
+		p1.Log(p2, "start", "%p:%d `%x`, %p:%v",
+			m.Shared.Src, m.Shared.Len, data, m.Type(), m.Type().Descriptor.FullName())
+	}
+
+	p1, p2 = p1.SetScratch(p2, uint64(m.Shared.Len))
+	p1, p2 = p1.PushMessage(p2, m)
+	p1, p2 = p1.SetScratch(p2, 0)
+
+	return p1, p2
 }
 
+// Done should be called in a defer immediately after [New].
 func (p3 *P3) Done(shared *dynamic.Shared, err *error) {
-	if tdp.GetCode(p3.Err) != tdp.ErrorOk && recover() != nil {
+	if tdp.GetCode(p3.err) != tdp.ErrorOk && recover() != nil {
 		// Make a copy of the error, since pp will get re-used by a future
 		// run of this function.
-		parseErr := p3.Err
+		parseErr := p3.err
 		*err = &parseErr
 
 		if debug.Enabled {
@@ -106,8 +102,8 @@ func (p3 *P3) Done(shared *dynamic.Shared, err *error) {
 
 	// These would all normally go in their own defers, but having a single
 	// defer is noticeably faster.
-	stackPool.Put(p3.Frames)
-	p3.Frames = nil
+	stackPool.Put(p3.frames)
+	p3.frames = nil
 	p3Pool.Put(p3)
 	shared.Lock.Unlock()
 }

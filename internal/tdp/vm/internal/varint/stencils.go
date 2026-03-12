@@ -21,7 +21,6 @@ package varint
 import (
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
-	"buf.build/go/hyperpb/internal/tdp/vm/internal/state"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
 	"math/bits"

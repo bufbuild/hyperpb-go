@@ -26,9 +26,8 @@ import (
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
-	"buf.build/go/hyperpb/internal/tdp/vm/internal/state"
-	"buf.build/go/hyperpb/internal/tdp/vm/options"
-	"buf.build/go/hyperpb/internal/tdp/vm/varint"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/options"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/zc"
 )
@@ -36,6 +35,12 @@ import (
 // Thunk is a callback for parsing a field. This is the "true" type of
 // [tdp.FieldParser].Parser.
 type Thunk func(P1, P2) (P1, P2)
+
+// Options is options for the vm.
+type Options = options.Options
+
+// Defaults returns the default settings for [Options].
+func Defaults() options.Options { return options.Defaults() }
 
 // Run is the top-level entry point for message parsing.
 func Run(m *dynamic.Message, data []byte, options *options.Options) (err error) {
@@ -52,25 +57,8 @@ func Run(m *dynamic.Message, data []byte, options *options.Options) (err error) 
 		return nil
 	}
 
-	p3 := state.NewP3(data, m.Shared, options)
-	defer p3.Done(m.Shared, &err)
-
-	p1 := P1{
-		SharedPtr: xunsafe.AddrOf(m.Shared),
-		PtrAddr:   xunsafe.AddrOf(m.Shared.Src),
-	}
-	p2 := P2{
-		P3Addr:  xunsafe.AddrOf(p3),
-		Scratch: uint64(m.Shared.Len),
-	}
-
-	if debug.Enabled {
-		p1.Log(p2, "start", "%p:%d `%x`, %p:%v",
-			m.Shared.Src, m.Shared.Len, data, m.Type(), m.Type().Descriptor.FullName())
-	}
-
-	p1, p2 = p1.PushMessage(p2, m)
-	p1, p2 = p1.SetScratch(p2, 0)
+	p1, p2 := impl.New(data, m, options)
+	defer p2.P3().Done(m.Shared, &err)
 	loop(p1, p2)
 
 	if rand.Float64() < options.ProfileRate && options.Recorder != nil {
@@ -88,7 +76,7 @@ func loop(p1 P1, p2 P2) {
 
 checkDone:
 	if p1.Len() == 0 {
-		if p1.EndGroup != state.NotAGroup {
+		if p1.EndGroup != impl.NotAGroup {
 			// If we run out of buffer while we're still
 			p1.Fail(p2, tdp.ErrorEndGroup)
 		}
@@ -131,13 +119,13 @@ number:
 
 		// Fast path: if the low sign bit is cleared, this is a one-byte tag.
 		p1, p2 = p1.SetScratch(p2, uint64(*p1.Ptr()))
-		if p2.Scratch&0x80 == 0 {
+		if p2.Scratch()&0x80 == 0 {
 			p1 = p1.Advance(1)
 
 			t := p2.Type()
 			lut := xunsafe.ByteAdd[byte](t, unsafe.Offsetof(t.TagLUT))
-			offset := xunsafe.Load(lut, p2.Scratch)
-			p1.Log(p2, "small tag", "%v -> %#x", tdp.Tag(p2.Scratch), offset)
+			offset := xunsafe.Load(lut, p2.Scratch())
+			p1.Log(p2, "small tag", "%v -> %#x", tdp.Tag(p2.Scratch()), offset)
 
 			if offset != 0xff {
 				p2.FieldAddr = xunsafe.AddrOf(t.Fields().Get(int(offset)))
@@ -148,22 +136,22 @@ number:
 
 		// Load up to eight bytes for the varint (at most 5 will be used).
 		p1, p2 = p1.SetScratch(p2, xunsafe.ByteLoad[uint64](p1.Ptr(), 0))
-		p1.Log(p2, "raw number", "%#x", p2.Scratch)
+		p1.Log(p2, "raw number", "%#x", p2.Scratch())
 
 		// Flip all of the sign bits. This essentially clears the sign bits
 		// of all of the varint bytes except the highest one's.
-		p1, p2 = p1.SetScratch(p2, p2.Scratch^tdp.SignBits)
+		p1, p2 = p1.SetScratch(p2, p2.Scratch()^tdp.SignBits)
 
 		// Determine the number of cleared sign bits. This will tell us how
 		// many bits to mask off as "irrelevant".
 		//
 		// In a varint (big-endian order) like 0a8b8c8d, this will be looking
 		// at ctz(80000000) = 31. Thus we need to mask off 64 - 31 = 33 bits.
-		tagBits := uint(bits.TrailingZeros64(p2.Scratch & tdp.SignBits))
+		tagBits := uint(bits.TrailingZeros64(p2.Scratch() & tdp.SignBits))
 
 		// The &63 is to ensure that Go does not generate a cmov to implement
 		// the x<<64 == 0 case.
-		masked = tdp.Tag(p2.Scratch &^ (^uint64(0) << (tagBits & 63)))
+		masked = tdp.Tag(p2.Scratch() &^ (^uint64(0) << (tagBits & 63)))
 
 		// No need to strip the sign bits, the ^= above already did that.
 
@@ -186,7 +174,7 @@ number:
 field:
 	{
 		tries := p2.P3().MaxMisses
-		tag := tdp.Tag(p2.Scratch)
+		tag := tdp.Tag(p2.Scratch())
 
 		for {
 			p1.Log(p2, "try", "%v, %v, %v", tag, tries, p2.Field())
@@ -222,7 +210,7 @@ parseField:
 		thunk := (*xunsafe.PC[Thunk])(&p2.Field().Parse).Get()
 		p1.Log(p2, "call", "%v, %#x", debug.Func(thunk), p2.FieldAddr)
 
-		// NOTE: Thunks are allowed to rely on p2.Scratch still containing
+		// NOTE: Thunks are allowed to rely on p2.Scratch() still containing
 		// the full field tag!
 		p1, p2 = thunk(p1, p2)
 
@@ -236,7 +224,7 @@ parseField:
 
 missedField:
 	{
-		tag := tdp.Tag(p2.Scratch)
+		tag := tdp.Tag(p2.Scratch())
 		p1, p2 = p1.SetScratch(p2, 0) // Make sure no one relies on this being preserved.
 
 		if tag == p1.EndGroup {
@@ -250,7 +238,7 @@ missedField:
 			p1.Fail(p2, tdp.ErrorOverflow)
 		}
 
-		// Finish parsing number into a varint.
+		// Finish parsing number into a
 		// This is a manual inlining of tag.decode.
 		mask := tdp.Tag(0x7f)
 		i := 0
@@ -291,7 +279,7 @@ missedField:
 			}
 
 			p1, p2 = p1.SetScratch(p2, uint64(p1.PtrAddr))
-			p1, p2, tag2 = varint.Varint64(p1, p2)
+			p1, p2, tag2 = Varint64(p1, p2)
 			if tag2 > math.MaxInt32<<3 {
 				p1.Fail(p2, tdp.ErrorOverflow)
 			}
@@ -302,14 +290,14 @@ missedField:
 				// we're in at this position, so we just send this to the main
 				// parsing loop.
 				p2.FieldAddr = p2.Type().Entrypoint.NextOk
-				p1.PtrAddr = xunsafe.Addr[byte](p2.Scratch)
+				p1.PtrAddr = xunsafe.Addr[byte](p2.Scratch())
 				p1.Log(p2, "goto end group", "%d", tag2)
 				goto number
 			}
 
 			p1, p2, tag2 = p1.ByTag(p2, tag2)
 			if p2.Field() != nil {
-				p1.PtrAddr = xunsafe.Addr[byte](p2.Scratch)
+				p1.PtrAddr = xunsafe.Addr[byte](p2.Scratch())
 				p1.Log(p2, "goto number", "%d", tag2)
 				goto number
 			}
@@ -374,7 +362,7 @@ func handleUnknown(p1 P1, p2 P2, tag uint64) (P1, P2) {
 }
 
 func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
-	tag := p2.Scratch
+	tag := p2.Scratch()
 	num := protowire.Number(tag >> 3)
 	ty := protowire.Type(tag & 0b111)
 	p1.Log(p2, "skipping", "%d, %d", num, ty)
@@ -385,7 +373,7 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 
 	switch ty {
 	case protowire.VarintType:
-		p1, p2, _ = varint.Varint64(p1, p2)
+		p1, p2, _ = Varint64(p1, p2)
 	case protowire.BytesType:
 		p1, p2, _ = Bytes(p1, p2)
 	case protowire.Fixed32Type:
@@ -401,7 +389,7 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 		end := protowire.EncodeTag(num, protowire.EndGroupType)
 		for {
 			var raw uint64
-			p1, p2, raw = varint.Varint64(p1, p2)
+			p1, p2, raw = Varint64(p1, p2)
 
 			if raw == end {
 				break
@@ -427,7 +415,7 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 func checkLargeVarint(p1 P1, p2 P2) (P1, P2) {
 	p1.Log(p2, "check large", "")
 
-	// This is a very large varint. We need to check the next two words.
+	// This is a very large  We need to check the next two words.
 	// This is a slow path, so we can afford to not be efficient.
 	switch xunsafe.Load(p1.Ptr(), -1) {
 	case 0x00:

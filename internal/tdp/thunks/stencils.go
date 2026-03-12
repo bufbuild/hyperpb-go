@@ -17,6 +17,9 @@
 package thunks
 
 import (
+	"math/bits"
+	"unsafe"
+
 	"buf.build/go/hyperpb/internal/arena/slice"
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/swiss"
@@ -24,13 +27,10 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/repeated"
 	"buf.build/go/hyperpb/internal/tdp/vm"
-	"buf.build/go/hyperpb/internal/tdp/vm/varint"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
 	"buf.build/go/hyperpb/internal/zigzag"
 	"google.golang.org/protobuf/encoding/protowire"
-	"math/bits"
-	"unsafe"
 )
 
 func parseMapV32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -77,7 +77,7 @@ func parseMapV32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -120,7 +120,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -167,7 +167,7 @@ func parseMapV32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -210,7 +210,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -257,7 +257,7 @@ func parseMapV32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -300,7 +300,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -347,7 +347,7 @@ func parseMapV32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -390,7 +390,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -437,7 +437,7 @@ func parseMapV32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -480,7 +480,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -527,7 +527,7 @@ func parseMapV32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -570,7 +570,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -617,7 +617,7 @@ func parseMapV32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -660,7 +660,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -707,7 +707,7 @@ func parseMapV32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -750,7 +750,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -797,7 +797,7 @@ func parseMapV32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -840,7 +840,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -887,7 +887,7 @@ func parseMapV64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -930,7 +930,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -977,7 +977,7 @@ func parseMapV64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1020,7 +1020,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1067,7 +1067,7 @@ func parseMapV64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1110,7 +1110,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1157,7 +1157,7 @@ func parseMapV64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1200,7 +1200,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1247,7 +1247,7 @@ func parseMapV64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1290,7 +1290,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1337,7 +1337,7 @@ func parseMapV64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1380,7 +1380,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1427,7 +1427,7 @@ func parseMapV64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1470,7 +1470,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1517,7 +1517,7 @@ func parseMapV64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1560,7 +1560,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapV64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1607,7 +1607,7 @@ func parseMapV64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1650,7 +1650,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1697,7 +1697,7 @@ func parseMapZ32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1740,7 +1740,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1787,7 +1787,7 @@ func parseMapZ32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1830,7 +1830,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1877,7 +1877,7 @@ func parseMapZ32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1920,7 +1920,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -1967,7 +1967,7 @@ func parseMapZ32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2010,7 +2010,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2057,7 +2057,7 @@ func parseMapZ32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2100,7 +2100,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2147,7 +2147,7 @@ func parseMapZ32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2190,7 +2190,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2237,7 +2237,7 @@ func parseMapZ32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2280,7 +2280,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2327,7 +2327,7 @@ func parseMapZ32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2370,7 +2370,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2417,7 +2417,7 @@ func parseMapZ32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2460,7 +2460,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2507,7 +2507,7 @@ func parseMapZ64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2550,7 +2550,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2597,7 +2597,7 @@ func parseMapZ64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2640,7 +2640,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2687,7 +2687,7 @@ func parseMapZ64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2730,7 +2730,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2777,7 +2777,7 @@ func parseMapZ64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2820,7 +2820,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2867,7 +2867,7 @@ func parseMapZ64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2910,7 +2910,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -2957,7 +2957,7 @@ func parseMapZ64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3000,7 +3000,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3047,7 +3047,7 @@ func parseMapZ64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3090,7 +3090,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3137,7 +3137,7 @@ func parseMapZ64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3180,7 +3180,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapZ64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3227,7 +3227,7 @@ func parseMapZ64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3270,7 +3270,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3317,7 +3317,7 @@ func parseMapF32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3360,7 +3360,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3407,7 +3407,7 @@ func parseMapF32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3450,7 +3450,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3497,7 +3497,7 @@ func parseMapF32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3540,7 +3540,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3587,7 +3587,7 @@ func parseMapF32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3630,7 +3630,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3677,7 +3677,7 @@ func parseMapF32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3720,7 +3720,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3767,7 +3767,7 @@ func parseMapF32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3810,7 +3810,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3857,7 +3857,7 @@ func parseMapF32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3900,7 +3900,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -3947,7 +3947,7 @@ func parseMapF32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3990,7 +3990,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4037,7 +4037,7 @@ func parseMapF32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4080,7 +4080,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4127,7 +4127,7 @@ func parseMapF64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4170,7 +4170,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4217,7 +4217,7 @@ func parseMapF64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4260,7 +4260,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4307,7 +4307,7 @@ func parseMapF64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4350,7 +4350,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4397,7 +4397,7 @@ func parseMapF64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4440,7 +4440,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4487,7 +4487,7 @@ func parseMapF64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4530,7 +4530,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4577,7 +4577,7 @@ func parseMapF64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4620,7 +4620,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4667,7 +4667,7 @@ func parseMapF64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4710,7 +4710,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4757,7 +4757,7 @@ func parseMapF64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4800,7 +4800,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapF64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4847,7 +4847,7 @@ func parseMapF64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4890,7 +4890,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -4937,7 +4937,7 @@ func parseMapSxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4980,7 +4980,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5027,7 +5027,7 @@ func parseMapSxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5070,7 +5070,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5117,7 +5117,7 @@ func parseMapSxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5160,7 +5160,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5207,7 +5207,7 @@ func parseMapSxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5250,7 +5250,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5297,7 +5297,7 @@ func parseMapSxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5340,7 +5340,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5387,7 +5387,7 @@ func parseMapSxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5430,7 +5430,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5477,7 +5477,7 @@ func parseMapSx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5520,7 +5520,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5567,7 +5567,7 @@ func parseMapSxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5610,7 +5610,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapSxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5657,7 +5657,7 @@ func parseMapSxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5700,7 +5700,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5747,7 +5747,7 @@ func parseMapBxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5790,7 +5790,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5837,7 +5837,7 @@ func parseMapBxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5880,7 +5880,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -5927,7 +5927,7 @@ func parseMapBxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5970,7 +5970,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6017,7 +6017,7 @@ func parseMapBxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6060,7 +6060,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6107,7 +6107,7 @@ func parseMapBxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6150,7 +6150,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6197,7 +6197,7 @@ func parseMapBxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6240,7 +6240,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6287,7 +6287,7 @@ func parseMapBx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6330,7 +6330,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6377,7 +6377,7 @@ func parseMapBxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6420,7 +6420,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMapBxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6467,7 +6467,7 @@ func parseMapBxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6510,7 +6510,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6557,7 +6557,7 @@ func parseMap2xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6600,7 +6600,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6647,7 +6647,7 @@ func parseMap2xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6690,7 +6690,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6737,7 +6737,7 @@ func parseMap2xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6780,7 +6780,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6827,7 +6827,7 @@ func parseMap2xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6870,7 +6870,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -6917,7 +6917,7 @@ func parseMap2xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6960,7 +6960,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -7007,7 +7007,7 @@ func parseMap2xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7050,7 +7050,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -7097,7 +7097,7 @@ func parseMap2x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7140,7 +7140,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -7187,7 +7187,7 @@ func parseMap2xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7230,7 +7230,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 func parseMap2xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
@@ -7277,7 +7277,7 @@ func parseMap2xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7320,7 +7320,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 
@@ -7365,7 +7365,7 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7413,7 +7413,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -7465,7 +7465,7 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7513,7 +7513,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -7565,7 +7565,7 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7613,7 +7613,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -7665,7 +7665,7 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7713,7 +7713,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -7765,7 +7765,7 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7813,7 +7813,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -7865,7 +7865,7 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7913,7 +7913,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -7965,7 +7965,7 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -8013,7 +8013,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -8065,7 +8065,7 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -8113,7 +8113,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -8165,7 +8165,7 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = varint.Varint32(p1, p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -8213,7 +8213,7 @@ insert:
 	p1, p2, v = vm.AllocMessage(p1, p2)
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	if fast {
@@ -8380,7 +8380,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.Log(p2, "zc", "%v", r.Raw)
 
 			p1.PtrAddr = p1.EndAddr
-			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 			return p1, p2
 		}
 		s = s.Grow(p1.Arena(), count)
@@ -8461,7 +8461,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1.Log(p2, "append", "%v", s.Addr())
 
 	r.Raw = s.Addr().Untyped()
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 
@@ -8509,7 +8509,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.Log(p2, "zc", "%v", r.Raw)
 
 			p1.PtrAddr = p1.EndAddr
-			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 			return p1, p2
 		}
 		s = s.Grow(p1.Arena(), count)
@@ -8590,7 +8590,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1.Log(p2, "append", "%v", s.Addr())
 
 	r.Raw = s.Addr().Untyped()
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 
@@ -8638,7 +8638,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.Log(p2, "zc", "%v", r.Raw)
 
 			p1.PtrAddr = p1.EndAddr
-			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+			p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 			return p1, p2
 		}
 		s = s.Grow(p1.Arena(), count)
@@ -8719,7 +8719,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1.Log(p2, "append", "%v", s.Addr())
 
 	r.Raw = s.Addr().Untyped()
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
 	return p1, p2
 }
 
@@ -8900,7 +8900,7 @@ func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	var p *uint32
 	p1, p2, p = vm.GetMutableField[uint32](p1, p2)
-	*p = uint32(p2.Scratch)
+	*p = uint32(p2.Scratch())
 
 	return p1, p2
 }
@@ -8910,7 +8910,7 @@ func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	var p *uint64
 	p1, p2, p = vm.GetMutableField[uint64](p1, p2)
-	*p = uint64(p2.Scratch)
+	*p = uint64(p2.Scratch())
 
 	return p1, p2
 }
@@ -8918,22 +8918,22 @@ func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint32]
 	p1, p2 = vm.P1.SetScratch(varint32(p1, p2))
-	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint32](p2.Scratch)))
+	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint32](p2.Scratch())))
 
 	var p *uint32
 	p1, p2, p = vm.GetMutableField[uint32](p1, p2)
-	*p = uint32(p2.Scratch)
+	*p = uint32(p2.Scratch())
 
 	return p1, p2
 }
 func parseZigZag64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint64]
 	p1, p2 = vm.P1.SetScratch(varint64(p1, p2))
-	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint64](p2.Scratch)))
+	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint64](p2.Scratch())))
 
 	var p *uint64
 	p1, p2, p = vm.GetMutableField[uint64](p1, p2)
-	*p = uint64(p2.Scratch)
+	*p = uint64(p2.Scratch())
 
 	return p1, p2
 }
