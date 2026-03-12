@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go tool hyperstencil
-
 package varint
 
 import (
@@ -22,7 +20,6 @@ import (
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
 	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
-	"buf.build/go/hyperpb/internal/xsimd"
 )
 
 // Varint32 parses a 64-bit varint, but will perform less work by discarding
@@ -30,36 +27,20 @@ import (
 //
 //go:nosplit
 func Varint32(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
-	switch {
-	case xsimd.AVX():
-		if debug.Enabled {
-			return AVX32Split(p1, p2)
-		}
-		return AVX32(p1, p2)
-	default:
-		if debug.Enabled {
-			return ScalarSplit(p1, p2)
-		}
-		return Scalar(p1, p2)
+	if debug.Enabled {
+		return ScalarSplit(p1, p2)
 	}
+	return Scalar(p1, p2)
 }
 
 // Varint64 parses a 32-bit varint.
 //
 //go:nosplit
 func Varint64(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
-	switch {
-	case xsimd.AVX():
-		if debug.Enabled {
-			return AVX64Split(p1, p2)
-		}
-		return AVX64(p1, p2)
-	default:
-		if debug.Enabled {
-			return ScalarSplit(p1, p2)
-		}
-		return Scalar(p1, p2)
+	if debug.Enabled {
+		return ScalarSplit(p1, p2)
 	}
+	return Scalar(p1, p2)
 }
 
 // Scalar is the core varint parsing implementation, using scalar operations
