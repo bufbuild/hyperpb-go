@@ -28,7 +28,7 @@
 
 //go:build amd64
 
-package vm
+package varint
 
 import (
 	"math/bits"
@@ -36,9 +36,10 @@ import (
 	"simd/archsimd"
 
 	"buf.build/go/hyperpb/internal/debug"
-	"buf.build/go/hyperpb/internal/xbits"
-	"buf.build/go/hyperpb/internal/xsimd"
+	"buf.build/go/hyperpb/internal/tdp"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/state"
 	"buf.build/go/hyperpb/internal/xunsafe"
+	"buf.build/go/hyperpb/internal/xunsafe/layout"
 )
 
 var (
@@ -46,11 +47,13 @@ var (
 
 	// And truncMasks[i] with a vector to zero all lanes i or greater, and all
 	// sign bits.
-	truncMasks = func() [16]archsimd.Uint8x16 {
+	truncMasks = func() [17]archsimd.Uint8x16 {
 		var mask archsimd.Uint8x16
-		var masks [16]archsimd.Uint8x16
+		var masks [17]archsimd.Uint8x16
 		for i := range masks {
-			mask = mask.SetElem(uint8(i), 0xff)
+			if i < 16 {
+				mask = mask.SetElem(uint8(i), 0xff)
+			}
 			masks[i] = mask.And(signBits128)
 		}
 
@@ -111,14 +114,15 @@ func split8to16(v archsimd.Uint8x16) (lo, hi archsimd.Uint16x8) {
 	return lo, hi
 }
 
-func init() {
-	if archsimd.X86.AVX() {
-		parseVarint = parseVarintAVX
-	}
-}
+//hyperpb:stencil AVX32 AVX[uint32]
+//hyperpb:stencil AVX64 AVX[uint64]
 
+// AVX is an AVX-accelerated varint parsing function.
+//
 //go:nosplit
-func parseVarintAVX(p1 P1, p2 P2) (P1, P2, uint64) {
+func AVX[T uint32 | uint64](p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+	long := layout.Size[T]() == 8
+
 	start := p1.PtrAddr
 	var x uint64
 
@@ -150,25 +154,30 @@ func parseVarintAVX(p1 P1, p2 P2) (P1, P2, uint64) {
 		p1.PtrAddr -= 2
 
 		if p1.Len() < 16 {
-			return parseVarintScalarNoinline(p1, p2)
+			return ScalarSplit(p1, p2)
 		}
 
 		data := archsimd.LoadUint8x16(xunsafe.Cast[[16]uint8](p1.Ptr()))
-		p1.Log(p2, "varint-avx", "data: %b", xsimd.Formatter(data))
+		p1.Log(p2, "varint-avx", "data: %b", data)
 
 		// Find all of the continuation bytes. ToBits produces pmovmskb which is
 		// what we want, although we have to do a redundant comparison here...
-		var zero archsimd.Int8x16
-		signs := data.AsInt8x16().Less(zero).ToBits()
+		signs := archsimd.Mask8x16(data.AsInt8x16()).ToBits()
 
+		n := bits.TrailingZeros16(^signs)
 		len := bits.TrailingZeros16(^signs) + 1
 
 		// Discard extra bytes and the sign bits.
-		data = data.And(truncMasks[(len-1)&0xf])
-		p1.Log(p2, "varint-avx", "len: %d, trunc: %b", len, xsimd.Formatter(data))
+		data = data.And(truncMasks[n])
+		p1.Log(p2, "varint-avx", "len: %d, trunc: %b", len, data)
 
-		lo, hi := split8to16(data)
-		p1.Log(p2, "varint-avx", "lo: %b, hi: %b", xsimd.Formatter(lo), xsimd.Formatter(hi))
+		var lo, hi archsimd.Uint16x8
+		if long {
+			lo, hi = split8to16(data)
+		} else {
+			lo = data.ExtendLo8ToUint16()
+		}
+		p1.Log(p2, "varint-avx", "lo: %b, hi: %b", lo, hi)
 
 		// lo and hi are now of the following form (highest bytes irrelevant, big
 		// endian u16s).
@@ -221,30 +230,36 @@ func parseVarintAVX(p1 P1, p2 P2) (P1, P2, uint64) {
 		// is big-endian.
 
 		lo = lo.Mul(mulShift)
-		hi = hi.Mul(mulShift)
-		p1.Log(p2, "varint-avx", "lo: %b, hi: %b", xsimd.Formatter(lo), xsimd.Formatter(hi))
+		if long {
+			hi = hi.Mul(mulShift)
+		}
+		p1.Log(p2, "varint-avx", "lo: %b, hi: %b", lo, hi)
+
+		// TODO: we can replace two of these the below vmovdqus with a
+		// a vpbroadcastb of 1 and vpsubb of the resulting vector, reducing
+		// memory traffic.
 
 		shuf0 := lo.AsUint8x16().PermuteOrZero(shuffles[0])
 		shuf1 := lo.AsUint8x16().PermuteOrZero(shuffles[1])
-		shuf2 := hi.AsUint8x16().PermuteOrZero(shuffles[2])
-		shuf3 := hi.AsUint8x16().PermuteOrZero(shuffles[3])
+		p1.Log(p2, "varint-avx", "0: %b, 1: %b", shuf0, shuf1)
+		or := shuf0.Or(shuf1)
 
-		p1.Log(p2, "varint-avx", "0: %b, 1: %b, 2: %b, 3: %b",
-			xsimd.Formatter(shuf0), xsimd.Formatter(shuf1),
-			xsimd.Formatter(shuf2), xsimd.Formatter(shuf3))
+		if long {
+			shuf2 := hi.AsUint8x16().PermuteOrZero(shuffles[2])
+			shuf3 := hi.AsUint8x16().PermuteOrZero(shuffles[3])
+			p1.Log(p2, "varint-avx", "2: %b, 3: %b", shuf2, shuf3)
+			or = or.Or(shuf2).Or(shuf3)
+		}
 
-		or := shuf0.Or(shuf1).Or(shuf2).Or(shuf3)
-		p1.Log(p2, "varint-avx", "or: %b", xsimd.Formatter(or))
+		p1.Log(p2, "varint-avx", "or: %b", or)
 		x = or.AsUint64x2().GetElem(0)
 		p1.Log(p2, "varint-avx", "out: %d, %b", x, x)
 
 		// Now, some cleanup. We have overflow conditions in the following cases:
 		//
-		// 1. len == 10 and data[9] is greater than 1. The unused byte hi[3] records
-		//    this overflow information.
+		// 1. len == 10 and data[9] is greater than 1.
 		// 2. len > 10.
-		truncated := xbits.Bit(hi.GetElem(3) != 0)|xbits.Bit(len > 10) != 0
-		if truncated {
+		if len >= 10 && (len > 10 || data.GetElem(9) > 1) {
 			goto fail
 		}
 
@@ -254,14 +269,14 @@ func parseVarintAVX(p1 P1, p2 P2) (P1, P2, uint64) {
 exit:
 	if debug.Enabled {
 		len := int(p1.PtrAddr - start) // For debug only.
-		p1.Log(p2, "varint", "%d:%#x (%d bytes)", x, x, len)
+		p1.Log(p2, "varint-avx", "%d:%#x (%d bytes)", x, x, len)
 		runtime.GC() // This checks for the above crash bug.
 	}
 
 	return p1, p2, x
 
 fail:
-	p1.Fail(p2, ErrorTruncated)
+	p1.Fail(p2, tdp.ErrorTruncated)
 	for {
 	}
 }

@@ -20,7 +20,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 
 	"buf.build/go/hyperpb/internal/tdp/compiler"
-	"buf.build/go/hyperpb/internal/tdp/vm"
+	"buf.build/go/hyperpb/internal/tdp/vm/options"
 )
 
 // The below are not interfaces because of https://github.com/golang/go/issues/74356,
@@ -60,7 +60,7 @@ func WithProfile(profile *Profile) CompileOption {
 }
 
 // UnmarshalOption is a configuration setting for [Message.Unmarshal].
-type UnmarshalOption struct{ apply func(*vm.Options) }
+type UnmarshalOption struct{ apply func(*options.Options) }
 
 // WithMaxDecodeMisses sets the number of decode misses allowed in the parser before
 // switching to the slow path.
@@ -69,14 +69,14 @@ type UnmarshalOption struct{ apply func(*vm.Options) }
 // potential DoS vector due to quadratic worst case performance. The default
 // is 4.
 func WithMaxDecodeMisses(maxMisses int) UnmarshalOption {
-	return UnmarshalOption{func(opts *vm.Options) { opts.MaxMisses = maxMisses }}
+	return UnmarshalOption{func(opts *options.Options) { opts.MaxMisses = maxMisses }}
 }
 
 // WithMaxDepth sets the maximum recursion depth for the parser.
 //
 // Setting a large value enables potential DoS vectors.
 func WithMaxDepth(depth int) UnmarshalOption {
-	return UnmarshalOption{func(opts *vm.Options) { opts.MaxDepth = min(depth, math.MaxUint32) }}
+	return UnmarshalOption{func(opts *options.Options) { opts.MaxDepth = min(depth, math.MaxUint32) }}
 }
 
 // WithDiscardUnknown sets whether unknown fields should be discarded while
@@ -85,13 +85,13 @@ func WithMaxDepth(depth int) UnmarshalOption {
 // Setting this option will break round-tripping, but will also improve parse
 // speeds of messages with many unknown fields.
 func WithDiscardUnknown(discard bool) UnmarshalOption {
-	return UnmarshalOption{func(opts *vm.Options) { opts.DiscardUnknown = discard }}
+	return UnmarshalOption{func(opts *options.Options) { opts.DiscardUnknown = discard }}
 }
 
 // WithAllowInvalidUTF8 sets whether UTF-8 is validated when parsing string
 // fields originating from non-proto2 files.
 func WithAllowInvalidUTF8(allow bool) UnmarshalOption {
-	return UnmarshalOption{func(opts *vm.Options) { opts.AllowInvalidUTF8 = allow }}
+	return UnmarshalOption{func(opts *options.Options) { opts.AllowInvalidUTF8 = allow }}
 }
 
 // WithAllowAlias sets whether aliasing the input buffer is allowed. This avoids
@@ -99,7 +99,7 @@ func WithAllowInvalidUTF8(allow bool) UnmarshalOption {
 //
 // Analogous to [protoimpl.UnmarshalAliasBuffer].
 func WithAllowAlias(allow bool) UnmarshalOption {
-	return UnmarshalOption{func(opts *vm.Options) { opts.AllowAlias = allow }}
+	return UnmarshalOption{func(opts *options.Options) { opts.AllowAlias = allow }}
 }
 
 // WithRecordProfile sets a profiler for an unmarshaling operation. Rate is a
@@ -111,7 +111,7 @@ func WithAllowAlias(allow bool) UnmarshalOption {
 // which can be used to recompile this type to be more efficient using
 // [MessageType.Recompile].
 func WithRecordProfile(profile *Profile, rate float64) UnmarshalOption {
-	return UnmarshalOption{func(opts *vm.Options) {
+	return UnmarshalOption{func(opts *options.Options) {
 		if profile == nil {
 			opts.Recorder = nil
 		} else {

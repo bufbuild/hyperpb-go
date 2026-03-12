@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"buf.build/go/hyperpb/internal/xflag"
+	"buf.build/go/hyperpb/internal/xsimd"
 	"github.com/timandy/routine"
 )
 
@@ -65,6 +66,10 @@ again:
 	pkg = pkg[:strings.Index(pkg, ".")]
 
 	file = filepath.Base(file)
+
+	for i := range args {
+		args[i] = xsimd.Format(args[i])
+	}
 
 	buf := new(strings.Builder)
 

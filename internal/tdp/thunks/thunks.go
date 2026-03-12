@@ -22,6 +22,8 @@ import (
 
 	"buf.build/go/hyperpb/internal/tdp/compiler"
 	"buf.build/go/hyperpb/internal/tdp/profile"
+	"buf.build/go/hyperpb/internal/tdp/vm"
+	"buf.build/go/hyperpb/internal/tdp/vm/varint"
 )
 
 //go:generate go run ../../tools/hyperstencil
@@ -69,4 +71,14 @@ func fieldKind(fd protoreflect.FieldDescriptor, prof profile.Field) protoreflect
 	default:
 		return k
 	}
+}
+
+//go:nosplit
+func varint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
+	return varint.Varint32(p1, p2)
+}
+
+//go:nosplit
+func varint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
+	return varint.Varint64(p1, p2)
 }

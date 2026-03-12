@@ -452,7 +452,7 @@ func (c *compiler) codegen(ir *ir) {
 	)
 	mpf.Push(tdp.FieldParser{
 		Tag:   mapValue,
-		Parse: uintptr(xunsafe.NewPC(vm.Thunk(vm.P1.ParseMapEntry))),
+		Parse: uintptr(xunsafe.NewPC(vm.Thunk(vm.ParseMapEntry))),
 	})
 
 	// Write the fast-lookup lut.

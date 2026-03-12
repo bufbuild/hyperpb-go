@@ -1,0 +1,1 @@
+// For allowing function declarations.

@@ -17,39 +17,40 @@ package xsimd
 import (
 	"fmt"
 	"reflect"
-	"unsafe"
-
-	"buf.build/go/hyperpb/internal/xunsafe/layout"
 )
 
-// Formatter returns a value wrapping v which formats it as if it were a slice.
-func Formatter[T any](v vector[T]) any {
-	return &format[T]{v}
+// Format returns either v, or if v is a SIMD vector, a type which formats it
+// as if it were a slice.
+func Format(v any) any {
+	t := reflect.TypeOf(v)
+	if t == nil || t.Size() == 0 || t.PkgPath() != "simd/archsimd" {
+		return t
+	}
+	return &format{v}
 }
 
-type vector[T any] interface {
-	StoreSlice([]T)
-}
-
-type format[T any] struct {
+type format struct {
 	v any
 }
 
-func (f format[T]) Format(s fmt.State, v rune) {
+func (f format) Format(s fmt.State, v rune) {
 	r := reflect.ValueOf(f.v)
 	d := reflect.New(r.Type())
 	d.Elem().Set(r)
 
-	n := int(r.Type().Size()) / layout.Size[T]()
-	p := unsafe.Slice((*T)(d.UnsafePointer()), n)
+	get, _ := r.Type().MethodByName("GetElem")
+	elem := get.Type.Out(0)
+
+	n := int(r.Type().Size() / elem.Size())
+	a := reflect.NewAt(reflect.ArrayOf(n, elem), d.UnsafePointer())
 
 	format := fmt.FormatString(s, v)
 	fmt.Fprint(s, "[")
-	for i, v := range p {
+	for i := range n {
 		if i > 0 {
 			fmt.Fprint(s, " ")
 		}
-		fmt.Fprintf(s, format, v)
+		fmt.Fprintf(s, format, a.Index(i))
 	}
 	fmt.Fprint(s, "]")
 }

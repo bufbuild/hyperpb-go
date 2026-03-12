@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vm
+package tdp
 
 import (
 	"errors"
@@ -46,26 +46,38 @@ var errs = [...]error{
 	ErrorTooBig:         errors.New("input was larger than 4GB"),
 }
 
-// ErrorCode is one of the possible types of errors in [ParseError].
+// ErrorCode is one of the possible types of errors in [Error].
 type ErrorCode int
 
-// ParseError is an error returned by the TDP parser.
-type ParseError struct {
+// ErrorAt returns a new error with this code.
+func (c ErrorCode) ErrorAt(offset int) Error {
+	return Error{c, offset}
+}
+
+// GetCode extracts the error code out of an [Error].
+func GetCode(e Error) ErrorCode {
+	return e.code
+}
+
+// Error is an error returned by the TDP parser.
+//
+// Do not add new methods to this type, since those become public API.
+type Error struct {
 	code   ErrorCode
 	offset int
 }
 
 // Offset returns the offset at which the error occurred.
-func (e *ParseError) Offset() int {
+func (e *Error) Offset() int {
 	return e.offset
 }
 
 // Unwrap implements error unwrapping viz [errors.Unwrap].
-func (e *ParseError) Unwrap() error {
+func (e *Error) Unwrap() error {
 	return errs[e.code]
 }
 
 // Error implements [error].
-func (e *ParseError) Error() string {
+func (e *Error) Error() string {
 	return fmt.Sprintf("hyperpb: parser error at offset %d/%#x: %v", e.offset, e.offset, e.Unwrap())
 }

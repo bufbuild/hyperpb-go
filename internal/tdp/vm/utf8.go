@@ -187,6 +187,6 @@ unicode:
 	}
 
 fail:
-	p1.Fail(p2, ErrorUTF8)
+	p1.Fail(p2, tdp.ErrorUTF8)
 	return p1, p2, 0
 }

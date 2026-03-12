@@ -28,6 +28,7 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/empty"
 	"buf.build/go/hyperpb/internal/tdp/vm"
+	vmoptions "buf.build/go/hyperpb/internal/tdp/vm/options"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
@@ -68,7 +69,7 @@ func NewMessage(ty *MessageType) *Message {
 // This function will return the approximate offset into data at which the
 // error occurred.
 func (m *Message) Unmarshal(data []byte, options ...UnmarshalOption) error {
-	opts := vm.NewOptions()
+	opts := vmoptions.Defaults()
 	for _, opt := range options {
 		if opt.apply != nil {
 			// Avoid having opt pointlessly escape to the heap.
@@ -77,7 +78,7 @@ func (m *Message) Unmarshal(data []byte, options ...UnmarshalOption) error {
 			opt.apply(xunsafe.NoEscape(&opts))
 		}
 	}
-	return vm.Run(&m.impl, data, opts)
+	return vm.Run(&m.impl, data, &opts)
 }
 
 // Shared returns state shared by this message and its submessages.

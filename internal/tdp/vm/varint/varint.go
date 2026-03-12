@@ -12,22 +12,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vm
+//go:generate go run buf.build/go/hyperpb/internal/tools/hyperstencil
+
+package varint
 
 import (
 	"runtime"
 
 	"buf.build/go/hyperpb/internal/debug"
+	"buf.build/go/hyperpb/internal/tdp"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/state"
+	"buf.build/go/hyperpb/internal/xsimd"
 )
 
-// Overridable at runtime, if good SIMD features are detected.
-var parseVarint = parseVarintScalar
+// Varint32 parses a 64-bit varint, but will perform less work by discarding
+// arbitrary high bits beyond bit 31.
+//
+//go:nosplit
+func Varint32(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+	switch {
+	case xsimd.AVX():
+		if debug.Enabled {
+			return AVX32Split(p1, p2)
+		}
+		return AVX32(p1, p2)
+	default:
+		if debug.Enabled {
+			return ScalarSplit(p1, p2)
+		}
+		return Scalar(p1, p2)
+	}
+}
 
-// parseVarint is the core varint parsing implementation.
+// Varint64 parses a 32-bit varint.
+//
+//go:nosplit
+func Varint64(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+	switch {
+	case xsimd.AVX():
+		if debug.Enabled {
+			return AVX64Split(p1, p2)
+		}
+		return AVX64(p1, p2)
+	default:
+		if debug.Enabled {
+			return ScalarSplit(p1, p2)
+		}
+		return Scalar(p1, p2)
+	}
+}
+
+// Scalar is the core varint parsing implementation, using scalar operations
+// only.
 //
 //go:nosplit
 //go:noinline
-func parseVarintScalar(p1 P1, p2 P2) (P1, P2, uint64) {
+func Scalar(p1 state.P1, p2 state.P2) (state.P1, state.P2, uint64) {
+
 	// Inlined from protowire.ConsumeVarint to minimize spills and remove
 	// bounds checks.
 	var b byte
@@ -163,7 +204,7 @@ func parseVarintScalar(p1 P1, p2 P2) (P1, P2, uint64) {
 		goto exit
 	}
 
-	p1.Fail(p2, ErrorOverflow)
+	p1.Fail(p2, tdp.ErrorOverflow)
 
 exit:
 	if debug.Enabled {
@@ -175,16 +216,6 @@ exit:
 	return p1, p2, x
 
 fail:
-	p1.Fail(p2, ErrorTruncated)
+	p1.Fail(p2, tdp.ErrorTruncated)
 	goto fail
-}
-
-//go:noinline
-func parseVarintNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
-	return parseVarint(p1, p2)
-}
-
-//go:noinline
-func parseVarintScalarNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
-	return parseVarintScalar(p1, p2)
 }

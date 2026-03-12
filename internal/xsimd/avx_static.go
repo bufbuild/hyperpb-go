@@ -12,4 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cpu
+//go:build amd64.v3
+
+package xsimd
+
+func AVX() bool { return true }

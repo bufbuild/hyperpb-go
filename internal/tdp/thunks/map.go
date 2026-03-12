@@ -26,6 +26,7 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/maps"
 	"buf.build/go/hyperpb/internal/tdp/vm"
+	"buf.build/go/hyperpb/internal/tdp/vm/varint"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
@@ -677,33 +678,33 @@ func (bytesItem) kind() protowire.Type    { return protowire.BytesType }
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (varint32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = varint.Varint32(p1, p2)
 	return p1, p2, uint32(n)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (varint64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
-	return p1.Varint(p2)
+	return varint.Varint64(p1, p2)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (zigzag32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = varint.Varint32(p1, p2)
 	return p1, p2, zigzag.Decode64[uint32](n)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (zigzag64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = varint.Varint64(p1, p2)
 	return p1, p2, zigzag.Decode64[uint64](n)
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func (boolItem) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint8) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = varint.Varint32(p1, p2)
 	if n != 0 {
 		n = 1
 	}
@@ -712,25 +713,25 @@ func (boolItem) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint8) {
 
 //go:nosplit
 func (fixed32Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint32) {
-	return p1.Fixed32(p2)
+	return vm.Fixed32(p1, p2)
 }
 
 //go:nosplit
 func (fixed64Item) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
-	return p1.Fixed64(p2)
+	return vm.Fixed64(p1, p2)
 }
 
 //go:nosplit
 func (stringItem) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
 	var r zc.Range
-	p1, p2, r = p1.UTF8(p2)
+	p1, p2, r = vm.UTF8(p1, p2)
 	return p1, p2, uint64(r)
 }
 
 //go:nosplit
 func (bytesItem) parse(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
 	var r zc.Range
-	p1, p2, r = p1.Bytes(p2)
+	p1, p2, r = vm.Bytes(p1, p2)
 	return p1, p2, uint64(r)
 }
 
@@ -845,7 +846,7 @@ func parseMapKxV[
 	K swiss.Key, V any,
 ](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -889,7 +890,7 @@ func parseMapKxV[
 	// afford to call varint() each time we parse a tag.
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = varint.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -899,7 +900,7 @@ func parseMapKxV[
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -932,7 +933,7 @@ insert:
 
 	*vp = v
 
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
 	return p1, p2
 }
 
@@ -949,7 +950,7 @@ insert:
 // parseMapKxM parses a map type whose value is a message type.
 func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -980,7 +981,7 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 			p1.PtrAddr++
 			// Need to parse a length prefix and check if it reaches all the
 			// way to the end of the message.
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -992,7 +993,7 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 	// afford to call varint() each time we parse a tag.
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = varint.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1000,7 +1001,7 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1044,7 +1045,7 @@ insert:
 	xunsafe.StoreNoWBUntyped(vp, unsafe.Pointer(v))
 
 	// Unspill the old end pointer.
-	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch())
+	p1.EndAddr = xunsafe.Addr[byte](p2.Scratch)
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	// Schedule a message parse.

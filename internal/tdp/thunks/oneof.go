@@ -23,6 +23,7 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/empty"
 	"buf.build/go/hyperpb/internal/tdp/vm"
+	"buf.build/go/hyperpb/internal/tdp/vm/varint"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
@@ -271,7 +272,7 @@ func parseOneofBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 func parseOneofBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = varint.Varint32(p1, p2)
 	if n != 0 {
 		n = 1
 	}
