@@ -29,10 +29,6 @@ export GOBIN := $(abspath $(BIN))
 COPYRIGHT_YEARS := 2025
 LICENSE_IGNORE := testdata/
 
-GO_VERSION := go1.26.1
-BUF_VERSION := v1.56.0 # Keep in sync w/ .github/workflows/buf.yaml.
-LINT_VERSION := v2.4.0 # Keep in sync w/ .github/workflows/ci.yaml.
-
 GOOS_HOST := $(shell go env GOOS)
 GOARCH_HOST := $(shell go env GOARCH)
 
@@ -60,10 +56,11 @@ HOST_TARGET ?=
 GO_HOST := $(HOST_TARGET) $(GO)
 GO := $(EXEC_ENV) $(GO)
 
+TOOLS := ./internal/tools/external/go.mod
 TEST := $(GO_HOST) tool hypertest -o $(TESTS) $(HYPERTESTFLAGS)
 DUMP := $(GO_HOST) tool hyperdump
-LINT := $(GO_HOST) tool -modfile go.tool.mod golangci-lint
-BUF := $(GO_HOST) tool -modfile go.tool.mod buf
+LINT := $(GO_HOST) tool -modfile $(TOOLS) golangci-lint
+BUF := $(GO_HOST) tool -modfile $(TOOLS)
 
 TAGS ?= ""
 REMOTE ?= ""
@@ -152,7 +149,7 @@ lintfix: generate ## Automatically fix some lint errors
 .PHONY: generate
 generate: internal/gen/*/*.pb.go ## Regenerate code and licenses
 	$(GO_HOST) generate ./...
-	$(GO_HOST) tool -modfile go.tool.mod license-header \
+	$(GO_HOST) tool -modfile $(TOOLS) license-header \
 		--license-type apache \
 		--copyright-holder "Buf Technologies, Inc." \
 		--year-range "$(COPYRIGHT_YEARS)" \

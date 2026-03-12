@@ -1,4 +1,4 @@
-module buf.build/go/hyperpb/tools
+module buf.build/go/hyperpb/internal/tools/external
 
 go 1.26.1
 
@@ -9,13 +9,15 @@ tool (
 )
 
 require (
-	al.essio.dev/pkg/shellescape v1.6.0
-	github.com/melbahja/goph v1.4.0
-	golang.org/x/crypto v0.48.0
-	golang.org/x/term v0.40.0
+	github.com/golangci/golangci-lint/v2 v2.11.3
+	github.com/bufbuild/buf v1.66.1
 )
 
 require (
+	al.essio.dev/pkg/shellescape v1.6.0 // indirect
+	github.com/melbahja/goph v1.4.0 // indirect
+	golang.org/x/crypto v0.48.0 // indirect
+	golang.org/x/term v0.40.0 // indirect
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
 	4d63.com/gochecknoglobals v0.2.2 // indirect
 	buf.build/gen/go/bufbuild/bufplugin/protocolbuffers/go v1.36.11-20250718181942-e35f9b667443.1 // indirect
@@ -70,7 +72,6 @@ require (
 	github.com/bombsimon/wsl/v5 v5.6.0 // indirect
 	github.com/breml/bidichk v0.3.3 // indirect
 	github.com/breml/errchkjson v0.4.1 // indirect
-	github.com/bufbuild/buf v1.66.1 // indirect
 	github.com/bufbuild/protocompile v0.14.2-0.20260306221011-519528254156 // indirect
 	github.com/bufbuild/protoplugin v0.0.0-20250218205857-750e09ce93e1 // indirect
 	github.com/butuzov/ireturn v0.4.0 // indirect
@@ -131,7 +132,6 @@ require (
 	github.com/golangci/dupl v0.0.0-20250308024227-f665c8d69b32 // indirect
 	github.com/golangci/go-printf-func-name v0.1.1 // indirect
 	github.com/golangci/gofmt v0.0.0-20250106114630-d62b90e6713d // indirect
-	github.com/golangci/golangci-lint/v2 v2.11.3 // indirect
 	github.com/golangci/golines v0.15.0 // indirect
 	github.com/golangci/misspell v0.8.0 // indirect
 	github.com/golangci/plugin-module-register v0.1.2 // indirect

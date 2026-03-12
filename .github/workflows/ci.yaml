@@ -82,4 +82,4 @@ jobs:
 
       - name: Lint
         uses: golangci/golangci-lint-action@v8
-        with: {version: v2.4.0} # Keep in sync with the Makefile.
+        with: {version: v2.11.3} # Keep in sync with internal/tools/external/go.mod.
