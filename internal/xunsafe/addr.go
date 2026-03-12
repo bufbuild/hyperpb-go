@@ -64,7 +64,7 @@ func (a Addr[T]) ByteAdd(n int) Addr[T] {
 	return a + Addr[T](n)
 }
 
-// Add adds the given offset to this address.
+// Sub returns the offset between two addresses.
 func (a Addr[T]) Sub(b Addr[T]) int {
 	return int(a-b) / layout.Size[T]()
 }
@@ -75,7 +75,7 @@ func (a Addr[T]) Padding(align int) int {
 	return layout.Padding(int(a), align)
 }
 
-// RoundUp rounds this address upwards to align, which must be a power of two.
+// RoundUpTo rounds this address upwards to align, which must be a power of two.
 func (a Addr[T]) RoundUpTo(align int) Addr[T] {
 	return Addr[T](layout.RoundUp(uintptr(a), uintptr(align)))
 }

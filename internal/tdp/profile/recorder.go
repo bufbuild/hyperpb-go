@@ -129,7 +129,7 @@ func (r *Recorder) ForField(site Site) Field {
 
 // Dump dumps this recorder's profile.
 func (r *Recorder) Dump() string {
-	var ms []*metrics //nolint:prealloc // I literally can't!!!
+	var ms []*metrics
 	for _, v := range r.profiles.All() {
 		ms = append(ms, v)
 	}

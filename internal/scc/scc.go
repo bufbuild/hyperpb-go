@@ -70,7 +70,7 @@ func (d *DAG[Node]) ForNode(node Node) *Component[Node] {
 	return &d.components[idx]
 }
 
-// To range over the components some node depends on.
+// Topological range over the components some node depends on.
 func (d *DAG[Node]) Topological() iter.Seq[*Component[Node]] {
 	return func(yield func(*Component[Node]) bool) {
 		for i := range d.components {

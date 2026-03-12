@@ -25,6 +25,8 @@
 //
 // Generated functions are placed in a file called _stencils.go. All files in
 // a package are processed in one go.
+//
+//nolint:gosec
 package main
 
 import (
@@ -330,7 +332,7 @@ func run() error {
 		}
 	}
 
-	var files []string //nolint:prealloc
+	var files []string
 	var newer bool
 	for _, dirent := range dir {
 		if dirent.Type().IsDir() ||
@@ -378,9 +380,7 @@ func run() error {
 	// Stenciling isn't super fast; parallelizing it helps a lot.
 	outs := make([]output, len(files))
 	for i, path := range files {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			file, err := parser.ParseFile(fset, path, nil, parser.ParseComments|parser.SkipObjectResolution)
 			if err != nil {
 				ch <- fmt.Errorf("%s:%w", path, err)
@@ -467,10 +467,7 @@ func run() error {
 			}
 
 			for i, dir := range directives {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
+				wg.Go(func() {
 					// Start by finding a func in file with this name.
 					generic := funcs[dir.Source]
 					stencil, err := makeStencil(dir, generic, &out.bases, &attrs)
@@ -481,9 +478,9 @@ func run() error {
 
 					// Finally, append stencil to the output file.
 					out.decls[i] = stencil
-				}()
+				})
 			}
-		}()
+		})
 	}
 
 	wg.Wait()

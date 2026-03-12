@@ -215,9 +215,7 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 	wg := new(sync.WaitGroup)
 	syncErr := new(atomic.Pointer[error])
 	for _, test := range tests {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			var err error
 			{
 				fmt.Printf("uploading %s...\n", test.binary(r, ""))
@@ -265,7 +263,7 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 				panic("got spurious nil error")
 			}
 			syncErr.CompareAndSwap(nil, &err)
-		}()
+		})
 	}
 	wg.Wait()
 	if err := syncErr.Load(); err != nil {

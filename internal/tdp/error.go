@@ -20,9 +20,10 @@ import (
 	"io"
 )
 
+// These match the errors in protowire.
 const (
 	ErrorOk ErrorCode = iota
-	// These match the errors in protowire.
+
 	ErrorTruncated
 	ErrorFieldNumber
 	ErrorOverflow

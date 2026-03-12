@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run buf.build/go/hyperpb/internal/tools/hyperstencil
+//go:generate go tool hyperstencil
 
 package varint
 

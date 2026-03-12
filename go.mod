@@ -39,3 +39,9 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250811230008-5f3141c8851a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250811230008-5f3141c8851a // indirect
 )
+
+tool (
+	buf.build/go/hyperpb/internal/tools/hyperdump
+	buf.build/go/hyperpb/internal/tools/hyperstencil
+	buf.build/go/hyperpb/internal/tools/hypertest
+)

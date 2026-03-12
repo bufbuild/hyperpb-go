@@ -54,7 +54,7 @@ type Type struct {
 	//    aforementioned field table.
 }
 
-// byIndex returns the nth byIndex (in byIndex number order) for this type.
+// ByIndex returns the nth byIndex (in byIndex number order) for this type.
 //
 // If n == 0 and this type has no fields, returns a byIndex with an invalid byIndex number.
 //

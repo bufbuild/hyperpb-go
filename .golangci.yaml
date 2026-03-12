@@ -44,6 +44,7 @@ linters:
     - predeclared               # Using predeclared names as variables is fine.
     - revive                    # Ditto. ^
 
+    - goprintffuncname          # Who cares.
     - lll                       # More trouble than it's worth.
     - makezero                  # Appending to non-empty slices is ok.
     - nestif                    # This encourages artificially breaking things up.

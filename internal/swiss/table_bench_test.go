@@ -37,7 +37,7 @@ const (
 
 var benchProbes = flag.Bool("hyperpb.benchprobe", false, "if true, benchmark probe sequence length")
 
-//go:generate go run ../tools/hyperstencil
+//go:generate go tool hyperstencil
 
 func BenchmarkTable(b *testing.B) {
 	u32Benchmark(b, uint32s{}, mapSize)

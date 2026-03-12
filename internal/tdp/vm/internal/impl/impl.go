@@ -148,7 +148,7 @@ func (p2 P2) Scratch() uint64 {
 	return p2.scratch
 }
 
-// Scratch sets the scratch register.
+// SetScratch sets the scratch register.
 //
 // The caller is responsible for spilling this value if necessary.
 func (p1 P1) SetScratch(p2 P2, v uint64) (P1, P2) {

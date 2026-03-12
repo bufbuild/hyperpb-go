@@ -17,9 +17,6 @@
 package thunks
 
 import (
-	"math/bits"
-	"unsafe"
-
 	"buf.build/go/hyperpb/internal/arena/slice"
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/swiss"
@@ -31,6 +28,8 @@ import (
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
 	"buf.build/go/hyperpb/internal/zigzag"
 	"google.golang.org/protobuf/encoding/protowire"
+	"math/bits"
+	"unsafe"
 )
 
 func parseMapV32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
