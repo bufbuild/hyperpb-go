@@ -29,10 +29,6 @@ export GOBIN := $(abspath $(BIN))
 COPYRIGHT_YEARS := 2025
 LICENSE_IGNORE := testdata/
 
-GO_VERSION := go1.25.0
-BUF_VERSION := v1.56.0 # Keep in sync w/ .github/workflows/buf.yaml.
-LINT_VERSION := v2.4.0 # Keep in sync w/ .github/workflows/ci.yaml.
-
 GOOS_HOST := $(shell go env GOOS)
 GOARCH_HOST := $(shell go env GOARCH)
 
@@ -41,12 +37,12 @@ GOARCH ?=
 GOAMD64 ?=
 GOARM64 ?=
 
-HOST_ENV ?= GOTOOLCHAIN=local
-EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=local
+GOTOOLCHAIN ?= local
+GOEXPERIMENT ?= simd
 
-# Go will carelessly pick these up on host-side builds if we don't unexport them.
-unexport GOOS
-unexport GOARCH
+HOST_ENV ?= GOTOOLCHAIN=$(GOTOOLCHAIN) GOEXPERIMENT=$(GOEXPERIMENT)
+EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=$(GOTOOLCHAIN) GOEXPERIMENT=$(GOEXPERIMENT)
+
 
 HYPERTESTFLAGS ?=
 TESTFLAGS ?=
@@ -54,9 +50,14 @@ BENCHFLAGS ?= -test.benchmem
 
 GO ?= go
 HOST_TARGET ?=
-GO_HOST := $(HOST_TARGET) $(GO)
+GO_HOST := $(HOST_ENV) $(GO)
 GO := $(EXEC_ENV) $(GO)
-TEST := $(EXEC_ENV) $(BIN)/hypertest -o $(TESTS) $(HYPERTESTFLAGS)
+
+TOOLS := ./internal/tools/external/go.mod
+TEST := $(GO_HOST) tool hypertest -o $(TESTS) -env "GOOS=$(GOOS);GOARCH=$(GOARCH);GOAMD64=$(GOAMD64);GOARM64=$(GOARM64)" $(HYPERTESTFLAGS)
+DUMP := $(GO_HOST) tool hyperdump
+LINT := $(GO_HOST) tool -modfile $(TOOLS) golangci-lint
+BUF := $(GO_HOST) tool -modfile $(TOOLS) buf
 
 TAGS ?= ""
 REMOTE ?= ""
@@ -73,6 +74,10 @@ else
 	PKGS := $(PKG)
 endif
 PKG ?= .
+
+# Go will carelessly pick these up on host-side builds if we don't unexport them.
+unexport GOOS
+unexport GOARCH
 
 .PHONY: help
 help: ## Describe useful make targets
@@ -91,7 +96,7 @@ clean: ## Delete intermediate build artifacts
 	git clean -Xdf
 
 .PHONY: test
-test: build $(BIN)/hypertest ## Run unit tests
+test: build ## Run unit tests
 	$(TEST) -remote=$(REMOTE) -tags=$(TAGS) -checkptr -p $(PKGS) -- \
 		$(TESTFLAGS)
 
@@ -111,7 +116,7 @@ profile: build $(BIN)/hypertest ## Profile benchmarks and open them in pprof
 .PHONY: asm
 asm: build ## Generate assembly output for manual inspection
 	$(GO) test -tags=$(TAGS) -c -o hyperpb.test $(PKG) $(TESTFLAGS)
-	$(GO_HOST) run ./internal/tools/hyperdump \
+	$(DUMP) \ 
 		-s '$(ASM_FILTER)' \
 		-info $(ASM_INFO) \
 		-prefix 'buf.build/go/hyperpb' \
@@ -123,24 +128,29 @@ asm: build ## Generate assembly output for manual inspection
 build: generate ## Build all packages
 	$(GO) build -tags=$(TAGS) $(PKGS)
 
+.PHONY: show-env
+show-env: ## Print the Go tool's interpreted environment.
+	go version
+	$(GO) env
+
 .PHONY: lint
-lint: $(BIN)/golangci-lint ## Lint
+lint: generate ## Lint
 	$(GO_HOST) vet -unsafeptr=false ./...
-	$(BIN)/golangci-lint -v run \
+	$(LINT) -v run \
 		--timeout 3m0s \
 		--modules-download-mode=readonly
 
 .PHONY: lintfix
-lintfix: $(BIN)/golangci-lint ## Automatically fix some lint errors
-	$(BIN)/golangci-lint run \
+lintfix: generate ## Automatically fix some lint errors
+	$(LINT) run \
 		--timeout 3m0s \
 		--modules-download-mode=readonly \
 		--fix
 
 .PHONY: generate
-generate: internal/gen/*/*.pb.go $(BIN)/license-header ## Regenerate code and licenses
+generate: internal/gen/*/*.pb.go ## Regenerate code and licenses
 	$(GO_HOST) generate ./...
-	$(BIN)/license-header \
+	$(GO_HOST) tool -modfile $(TOOLS) license-header \
 		--license-type apache \
 		--copyright-holder "Buf Technologies, Inc." \
 		--year-range "$(COPYRIGHT_YEARS)" \
@@ -157,23 +167,6 @@ checkgenerate:
 	@# Used in CI to verify that `make generate` doesn't produce a diff.
 	git --no-pager diff --exit-code >&2
 
-internal/gen/*/*.pb.go: $(BIN)/buf internal/proto/*/*/*.proto internal/proto/*/*/*/*.proto
-	$(BIN)/buf generate --clean
-	$(BIN)/buf generate --template buf.vt.gen.yaml
-
-.PHONY: $(BIN)/hypertest
-$(BIN)/hypertest: generate
-	@mkdir -p $(@D)
-	$(GO_HOST) build -o $(BIN)/hypertest ./internal/tools/hypertest
-
-$(BIN)/buf: Makefile
-	@mkdir -p $(@D)
-	$(GO_HOST) install github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION)
-
-$(BIN)/license-header: Makefile
-	@mkdir -p $(@D)
-	$(GO_HOST) install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(BUF_VERSION)
-
-$(BIN)/golangci-lint: Makefile
-	@mkdir -p $(@D)
-	$(GO_HOST) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(LINT_VERSION)
+internal/gen/*/*.pb.go: internal/proto/*/*/*.proto internal/proto/*/*/*/*.proto
+	$(BUF) generate --clean
+	$(BUF) generate --template buf.vt.gen.yaml

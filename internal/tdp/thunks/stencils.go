@@ -36,7 +36,7 @@ func parseMapV32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, varint32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -76,7 +76,7 @@ func parseMapV32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -86,7 +86,7 @@ func parseMapV32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -126,7 +126,7 @@ func parseMapV32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, varint64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -166,7 +166,7 @@ func parseMapV32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -176,7 +176,7 @@ func parseMapV32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -216,7 +216,7 @@ func parseMapV32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, zigzag32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -256,7 +256,7 @@ func parseMapV32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -266,7 +266,7 @@ func parseMapV32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -306,7 +306,7 @@ func parseMapV32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, zigzag64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -346,7 +346,7 @@ func parseMapV32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -356,7 +356,7 @@ func parseMapV32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -396,7 +396,7 @@ func parseMapV32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, fixed32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -436,7 +436,7 @@ func parseMapV32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -446,7 +446,7 @@ func parseMapV32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -486,7 +486,7 @@ func parseMapV32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, fixed64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -526,7 +526,7 @@ func parseMapV32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -536,7 +536,7 @@ func parseMapV32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -576,7 +576,7 @@ func parseMapV32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, boolItem, uint32, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -616,7 +616,7 @@ func parseMapV32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -626,7 +626,7 @@ func parseMapV32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -666,7 +666,7 @@ func parseMapV32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, stringItem, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -706,7 +706,7 @@ func parseMapV32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -716,7 +716,7 @@ func parseMapV32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -756,7 +756,7 @@ func parseMapV32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint32Item, bytesItem, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -796,7 +796,7 @@ func parseMapV32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -806,7 +806,7 @@ func parseMapV32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -846,7 +846,7 @@ func parseMapV64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, varint32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -886,7 +886,7 @@ func parseMapV64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -896,7 +896,7 @@ func parseMapV64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -936,7 +936,7 @@ func parseMapV64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, varint64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -976,7 +976,7 @@ func parseMapV64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -986,7 +986,7 @@ func parseMapV64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1026,7 +1026,7 @@ func parseMapV64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, zigzag32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1066,7 +1066,7 @@ func parseMapV64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1076,7 +1076,7 @@ func parseMapV64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1116,7 +1116,7 @@ func parseMapV64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, zigzag64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1156,7 +1156,7 @@ func parseMapV64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1166,7 +1166,7 @@ func parseMapV64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1206,7 +1206,7 @@ func parseMapV64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, fixed32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1246,7 +1246,7 @@ func parseMapV64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1256,7 +1256,7 @@ func parseMapV64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1296,7 +1296,7 @@ func parseMapV64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, fixed64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1336,7 +1336,7 @@ func parseMapV64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1346,7 +1346,7 @@ func parseMapV64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1386,7 +1386,7 @@ func parseMapV64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, boolItem, uint64, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1426,7 +1426,7 @@ func parseMapV64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1436,7 +1436,7 @@ func parseMapV64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1476,7 +1476,7 @@ func parseMapV64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, stringItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1516,7 +1516,7 @@ func parseMapV64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1526,7 +1526,7 @@ func parseMapV64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1566,7 +1566,7 @@ func parseMapV64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[varint64Item, bytesItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1606,7 +1606,7 @@ func parseMapV64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1616,7 +1616,7 @@ func parseMapV64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1656,7 +1656,7 @@ func parseMapZ32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, varint32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1696,7 +1696,7 @@ func parseMapZ32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1706,7 +1706,7 @@ func parseMapZ32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1746,7 +1746,7 @@ func parseMapZ32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, varint64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1786,7 +1786,7 @@ func parseMapZ32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1796,7 +1796,7 @@ func parseMapZ32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1836,7 +1836,7 @@ func parseMapZ32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, zigzag32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1876,7 +1876,7 @@ func parseMapZ32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1886,7 +1886,7 @@ func parseMapZ32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -1926,7 +1926,7 @@ func parseMapZ32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, zigzag64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -1966,7 +1966,7 @@ func parseMapZ32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -1976,7 +1976,7 @@ func parseMapZ32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2016,7 +2016,7 @@ func parseMapZ32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, fixed32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2056,7 +2056,7 @@ func parseMapZ32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2066,7 +2066,7 @@ func parseMapZ32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2106,7 +2106,7 @@ func parseMapZ32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, fixed64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2146,7 +2146,7 @@ func parseMapZ32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2156,7 +2156,7 @@ func parseMapZ32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2196,7 +2196,7 @@ func parseMapZ32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, boolItem, uint32, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2236,7 +2236,7 @@ func parseMapZ32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2246,7 +2246,7 @@ func parseMapZ32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2286,7 +2286,7 @@ func parseMapZ32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, stringItem, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2326,7 +2326,7 @@ func parseMapZ32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2336,7 +2336,7 @@ func parseMapZ32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2376,7 +2376,7 @@ func parseMapZ32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag32Item, bytesItem, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2416,7 +2416,7 @@ func parseMapZ32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2426,7 +2426,7 @@ func parseMapZ32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2466,7 +2466,7 @@ func parseMapZ64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, varint32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2506,7 +2506,7 @@ func parseMapZ64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2516,7 +2516,7 @@ func parseMapZ64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2556,7 +2556,7 @@ func parseMapZ64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, varint64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2596,7 +2596,7 @@ func parseMapZ64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2606,7 +2606,7 @@ func parseMapZ64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2646,7 +2646,7 @@ func parseMapZ64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, zigzag32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2686,7 +2686,7 @@ func parseMapZ64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2696,7 +2696,7 @@ func parseMapZ64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2736,7 +2736,7 @@ func parseMapZ64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, zigzag64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2776,7 +2776,7 @@ func parseMapZ64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2786,7 +2786,7 @@ func parseMapZ64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2826,7 +2826,7 @@ func parseMapZ64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, fixed32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2866,7 +2866,7 @@ func parseMapZ64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2876,7 +2876,7 @@ func parseMapZ64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -2916,7 +2916,7 @@ func parseMapZ64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, fixed64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -2956,7 +2956,7 @@ func parseMapZ64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -2966,7 +2966,7 @@ func parseMapZ64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3006,7 +3006,7 @@ func parseMapZ64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, boolItem, uint64, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3046,7 +3046,7 @@ func parseMapZ64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3056,7 +3056,7 @@ func parseMapZ64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3096,7 +3096,7 @@ func parseMapZ64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, stringItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3136,7 +3136,7 @@ func parseMapZ64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3146,7 +3146,7 @@ func parseMapZ64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3186,7 +3186,7 @@ func parseMapZ64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[zigzag64Item, bytesItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3226,7 +3226,7 @@ func parseMapZ64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3236,7 +3236,7 @@ func parseMapZ64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3276,7 +3276,7 @@ func parseMapF32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, varint32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3316,7 +3316,7 @@ func parseMapF32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3326,7 +3326,7 @@ func parseMapF32xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3366,7 +3366,7 @@ func parseMapF32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, varint64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3406,7 +3406,7 @@ func parseMapF32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3416,7 +3416,7 @@ func parseMapF32xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3456,7 +3456,7 @@ func parseMapF32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, zigzag32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3496,7 +3496,7 @@ func parseMapF32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3506,7 +3506,7 @@ func parseMapF32xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3546,7 +3546,7 @@ func parseMapF32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, zigzag64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3586,7 +3586,7 @@ func parseMapF32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3596,7 +3596,7 @@ func parseMapF32xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3636,7 +3636,7 @@ func parseMapF32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, fixed32Item, uint32, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3676,7 +3676,7 @@ func parseMapF32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3686,7 +3686,7 @@ func parseMapF32xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3726,7 +3726,7 @@ func parseMapF32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, fixed64Item, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3766,7 +3766,7 @@ func parseMapF32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3776,7 +3776,7 @@ func parseMapF32xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3816,7 +3816,7 @@ func parseMapF32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, boolItem, uint32, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3856,7 +3856,7 @@ func parseMapF32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3866,7 +3866,7 @@ func parseMapF32x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3906,7 +3906,7 @@ func parseMapF32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, stringItem, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -3946,7 +3946,7 @@ func parseMapF32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -3956,7 +3956,7 @@ func parseMapF32xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -3996,7 +3996,7 @@ func parseMapF32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed32Item, bytesItem, uint32, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4036,7 +4036,7 @@ func parseMapF32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4046,7 +4046,7 @@ func parseMapF32xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4086,7 +4086,7 @@ func parseMapF64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, varint32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4126,7 +4126,7 @@ func parseMapF64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4136,7 +4136,7 @@ func parseMapF64xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4176,7 +4176,7 @@ func parseMapF64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, varint64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4216,7 +4216,7 @@ func parseMapF64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4226,7 +4226,7 @@ func parseMapF64xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4266,7 +4266,7 @@ func parseMapF64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, zigzag32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4306,7 +4306,7 @@ func parseMapF64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4316,7 +4316,7 @@ func parseMapF64xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4356,7 +4356,7 @@ func parseMapF64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, zigzag64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4396,7 +4396,7 @@ func parseMapF64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4406,7 +4406,7 @@ func parseMapF64xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4446,7 +4446,7 @@ func parseMapF64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, fixed32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4486,7 +4486,7 @@ func parseMapF64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4496,7 +4496,7 @@ func parseMapF64xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4536,7 +4536,7 @@ func parseMapF64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, fixed64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4576,7 +4576,7 @@ func parseMapF64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4586,7 +4586,7 @@ func parseMapF64xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4626,7 +4626,7 @@ func parseMapF64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, boolItem, uint64, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4666,7 +4666,7 @@ func parseMapF64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4676,7 +4676,7 @@ func parseMapF64x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4716,7 +4716,7 @@ func parseMapF64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, stringItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4756,7 +4756,7 @@ func parseMapF64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4766,7 +4766,7 @@ func parseMapF64xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4806,7 +4806,7 @@ func parseMapF64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[fixed64Item, bytesItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4846,7 +4846,7 @@ func parseMapF64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4856,7 +4856,7 @@ func parseMapF64xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4896,7 +4896,7 @@ func parseMapSxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, varint32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -4936,7 +4936,7 @@ func parseMapSxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -4946,7 +4946,7 @@ func parseMapSxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -4986,7 +4986,7 @@ func parseMapSxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, varint64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5026,7 +5026,7 @@ func parseMapSxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5036,7 +5036,7 @@ func parseMapSxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5076,7 +5076,7 @@ func parseMapSxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, zigzag32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5116,7 +5116,7 @@ func parseMapSxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5126,7 +5126,7 @@ func parseMapSxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5166,7 +5166,7 @@ func parseMapSxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, zigzag64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5206,7 +5206,7 @@ func parseMapSxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5216,7 +5216,7 @@ func parseMapSxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5256,7 +5256,7 @@ func parseMapSxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, fixed32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5296,7 +5296,7 @@ func parseMapSxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5306,7 +5306,7 @@ func parseMapSxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5346,7 +5346,7 @@ func parseMapSxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, fixed64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5386,7 +5386,7 @@ func parseMapSxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5396,7 +5396,7 @@ func parseMapSxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5436,7 +5436,7 @@ func parseMapSx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, boolItem, uint64, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5476,7 +5476,7 @@ func parseMapSx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5486,7 +5486,7 @@ func parseMapSx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5526,7 +5526,7 @@ func parseMapSxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, stringItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5566,7 +5566,7 @@ func parseMapSxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5576,7 +5576,7 @@ func parseMapSxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5616,7 +5616,7 @@ func parseMapSxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[stringItem, bytesItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5656,7 +5656,7 @@ func parseMapSxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5666,7 +5666,7 @@ func parseMapSxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5706,7 +5706,7 @@ func parseMapBxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, varint32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5746,7 +5746,7 @@ func parseMapBxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5756,7 +5756,7 @@ func parseMapBxV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5796,7 +5796,7 @@ func parseMapBxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, varint64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5836,7 +5836,7 @@ func parseMapBxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5846,7 +5846,7 @@ func parseMapBxV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5886,7 +5886,7 @@ func parseMapBxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, zigzag32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -5926,7 +5926,7 @@ func parseMapBxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -5936,7 +5936,7 @@ func parseMapBxZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -5976,7 +5976,7 @@ func parseMapBxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, zigzag64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6016,7 +6016,7 @@ func parseMapBxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6026,7 +6026,7 @@ func parseMapBxZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6066,7 +6066,7 @@ func parseMapBxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, fixed32Item, uint64, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6106,7 +6106,7 @@ func parseMapBxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6116,7 +6116,7 @@ func parseMapBxF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6156,7 +6156,7 @@ func parseMapBxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, fixed64Item, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6196,7 +6196,7 @@ func parseMapBxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6206,7 +6206,7 @@ func parseMapBxF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6246,7 +6246,7 @@ func parseMapBx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, boolItem, uint64, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6286,7 +6286,7 @@ func parseMapBx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6296,7 +6296,7 @@ func parseMapBx2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6336,7 +6336,7 @@ func parseMapBxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, stringItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6376,7 +6376,7 @@ func parseMapBxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6386,7 +6386,7 @@ func parseMapBxS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6426,7 +6426,7 @@ func parseMapBxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[bytesItem, bytesItem, uint64, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6466,7 +6466,7 @@ func parseMapBxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6476,7 +6476,7 @@ func parseMapBxB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6516,7 +6516,7 @@ func parseMap2xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, varint32Item, uint8, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6556,7 +6556,7 @@ func parseMap2xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6566,7 +6566,7 @@ func parseMap2xV32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6606,7 +6606,7 @@ func parseMap2xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, varint64Item, uint8, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6646,7 +6646,7 @@ func parseMap2xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6656,7 +6656,7 @@ func parseMap2xV64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6696,7 +6696,7 @@ func parseMap2xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, zigzag32Item, uint8, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6736,7 +6736,7 @@ func parseMap2xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6746,7 +6746,7 @@ func parseMap2xZ32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6786,7 +6786,7 @@ func parseMap2xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, zigzag64Item, uint8, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6826,7 +6826,7 @@ func parseMap2xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6836,7 +6836,7 @@ func parseMap2xZ64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6876,7 +6876,7 @@ func parseMap2xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, fixed32Item, uint8, uint32]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -6916,7 +6916,7 @@ func parseMap2xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -6926,7 +6926,7 @@ func parseMap2xF32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -6966,7 +6966,7 @@ func parseMap2xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, fixed64Item, uint8, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7006,7 +7006,7 @@ func parseMap2xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7016,7 +7016,7 @@ func parseMap2xF64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7056,7 +7056,7 @@ func parseMap2x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, boolItem, uint8, uint8]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7096,7 +7096,7 @@ func parseMap2x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7106,7 +7106,7 @@ func parseMap2x2(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7146,7 +7146,7 @@ func parseMap2xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, stringItem, uint8, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7186,7 +7186,7 @@ func parseMap2xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7196,7 +7196,7 @@ func parseMap2xS(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7236,7 +7236,7 @@ func parseMap2xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxV[boolItem, bytesItem, uint8, uint64]
 
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7276,7 +7276,7 @@ func parseMap2xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7286,7 +7286,7 @@ func parseMap2xB(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7326,7 +7326,7 @@ insert:
 func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[varint32Item, uint32]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7354,7 +7354,7 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7364,7 +7364,7 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7372,7 +7372,7 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7426,7 +7426,7 @@ insert:
 func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[varint64Item, uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7454,7 +7454,7 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7464,7 +7464,7 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7472,7 +7472,7 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7526,7 +7526,7 @@ insert:
 func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[zigzag32Item, uint32]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7554,7 +7554,7 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7564,7 +7564,7 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7572,7 +7572,7 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7626,7 +7626,7 @@ insert:
 func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[zigzag64Item, uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7654,7 +7654,7 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7664,7 +7664,7 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7672,7 +7672,7 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7726,7 +7726,7 @@ insert:
 func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[fixed32Item, uint32]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7754,7 +7754,7 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7764,7 +7764,7 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7772,7 +7772,7 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7826,7 +7826,7 @@ insert:
 func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[fixed64Item, uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7854,7 +7854,7 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7864,7 +7864,7 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7872,7 +7872,7 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -7926,7 +7926,7 @@ insert:
 func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[stringItem, uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -7954,7 +7954,7 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -7964,7 +7964,7 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -7972,7 +7972,7 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -8026,7 +8026,7 @@ insert:
 func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[bytesItem, uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -8054,7 +8054,7 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -8064,7 +8064,7 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -8072,7 +8072,7 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -8126,7 +8126,7 @@ insert:
 func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseMapKxM[boolItem, uint8]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 
 	p1, p2 = p1.SetScratch(p2, uint64(p1.EndAddr))
 	p1.EndAddr = p1.PtrAddr.Add(n)
@@ -8154,7 +8154,7 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 
-			p1, p2, n = p1.LengthPrefix(p2)
+			p1, p2, n = vm.LengthPrefix(p1, p2)
 			if p1.EndAddr > p1.PtrAddr.Add(n) {
 				fast = true
 				goto insert
@@ -8164,7 +8164,7 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 	for p1.PtrAddr < p1.EndAddr {
 		var tag uint64
-		p1, p2, tag = p1.Varint(p2)
+		p1, p2, tag = vm.Varint32(p1, p2)
 		switch tag {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
@@ -8172,7 +8172,7 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
-				p1.Fail(p2, -vm.ErrorCode(m))
+				p1.Fail(p2, -tdp.ErrorCode(m))
 			}
 			p1.PtrAddr = p1.PtrAddr.Add(m)
 		}
@@ -8226,7 +8226,7 @@ insert:
 func parseRepeatedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint8]
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, uint8]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, uint8]](p1, p2)
@@ -8263,7 +8263,7 @@ func parseRepeatedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseRepeatedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint32]
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, uint32]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, uint32]](p1, p2)
@@ -8300,7 +8300,7 @@ func parseRepeatedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseRepeatedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint64]
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, uint64]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, uint64]](p1, p2)
@@ -8339,7 +8339,7 @@ func parseRepeatedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint8]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
@@ -8430,7 +8430,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = p1.Varint(p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = uint8(x)
@@ -8444,7 +8444,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = p1.Varint(p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = uint8(x)
 			p = p.Add(1)
@@ -8468,7 +8468,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint32]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
@@ -8559,7 +8559,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = p1.Varint(p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = uint32(x)
@@ -8573,7 +8573,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = p1.Varint(p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = uint32(x)
 			p = p.Add(1)
@@ -8597,7 +8597,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedVarint[uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
@@ -8688,7 +8688,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = p1.Varint(p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = uint64(x)
@@ -8702,7 +8702,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = p1.Varint(p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = uint64(x)
 			p = p.Add(1)
@@ -8782,14 +8782,14 @@ func appendFixed64(p1 vm.P1, p2 vm.P2, v uint64) (vm.P1, vm.P2) {
 func parsePackedFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedFixed[uint32]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
 
 	size := layout.Size[uint32]()
 	if n%size != 0 {
-		p1.Fail(p2, vm.ErrorTruncated)
+		p1.Fail(p2, tdp.ErrorTruncated)
 	}
 
 	var r *repeated.Scalars[uint32, uint32]
@@ -8839,14 +8839,14 @@ exit:
 func parsePackedFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parsePackedFixed[uint64]
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
 
 	size := layout.Size[uint64]()
 	if n%size != 0 {
-		p1.Fail(p2, vm.ErrorTruncated)
+		p1.Fail(p2, tdp.ErrorTruncated)
 	}
 
 	var r *repeated.Scalars[uint64, uint64]
@@ -8895,7 +8895,7 @@ exit:
 }
 func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseVarint[uint32]
-	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 
 	var p *uint32
 	p1, p2, p = vm.GetMutableField[uint32](p1, p2)
@@ -8905,7 +8905,7 @@ func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseVarint[uint64]
-	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 
 	var p *uint64
 	p1, p2, p = vm.GetMutableField[uint64](p1, p2)
@@ -8916,7 +8916,7 @@ func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint32]
-	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint32](p2.Scratch())))
 
 	var p *uint32
@@ -8927,7 +8927,7 @@ func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 func parseZigZag64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint64]
-	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint64](p2.Scratch())))
 
 	var p *uint64
@@ -8941,7 +8941,7 @@ func parseZigZag64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseFixed[uint32]
 	if p1.Len() < layout.Size[uint32]() {
-		p1.Fail(p2, vm.ErrorTruncated)
+		p1.Fail(p2, tdp.ErrorTruncated)
 	}
 	var p *uint32
 	p1, p2, p = vm.GetMutableField[uint32](p1, p2)
@@ -8955,7 +8955,7 @@ func parseFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseFixed[uint64]
 	if p1.Len() < layout.Size[uint64]() {
-		p1.Fail(p2, vm.ErrorTruncated)
+		p1.Fail(p2, tdp.ErrorTruncated)
 	}
 	var p *uint64
 	p1, p2, p = vm.GetMutableField[uint64](p1, p2)

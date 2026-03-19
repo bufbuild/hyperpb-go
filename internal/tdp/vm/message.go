@@ -23,7 +23,7 @@ import (
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
-//go:generate go run ../../tools/hyperstencil
+//go:generate go tool hyperstencil
 
 // This file contains inlined or modified versions of functions from
 // package [dynamic], since Go cannot seem to inline them, resulting in

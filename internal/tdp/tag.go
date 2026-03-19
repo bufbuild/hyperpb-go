@@ -30,7 +30,7 @@ import (
 // message, but with the high bit of each byte cleared.
 type Tag uint64
 
-// encode encodes this field tag from the given number and type.
+// EncodeTag encodes this field tag from the given number and type.
 func EncodeTag(n protowire.Number, t protowire.Type) Tag {
 	var tag Tag
 	protowire.AppendTag(xunsafe.Bytes(&tag)[:0], n, t)
@@ -76,8 +76,8 @@ func (t Tag) Format(s fmt.State, verb rune) {
 	debug.Fprintf("%#x:%d:%d", uint64(t), n, ty).Format(s, verb)
 }
 
-// Returns whether this tag is "too large", i.e., if it has more than 32 bits
-// when decoded.
+// Overflows returns whether this tag is "too large", i.e., if it has more than
+// 32 bits when decoded.
 func (t Tag) Overflows() bool {
 	return bits.LeadingZeros64(uint64(t)) < (64 - 32 - 4)
 }

@@ -12,18 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vm
+package varint
 
 import (
 	"runtime"
 
 	"buf.build/go/hyperpb/internal/debug"
+	"buf.build/go/hyperpb/internal/tdp"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
 )
 
-// parseVarint is the core varint parsing implementation.
+// Varint32 parses a 64-bit varint, but will perform less work by discarding
+// arbitrary high bits beyond bit 31.
 //
 //go:nosplit
-func parseVarint(p1 P1, p2 P2) (P1, P2, uint64) {
+func Varint32(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
+	if debug.Enabled {
+		return ScalarSplit(p1, p2)
+	}
+	return Scalar(p1, p2)
+}
+
+// Varint64 parses a 32-bit varint.
+//
+//go:nosplit
+func Varint64(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
+	if debug.Enabled {
+		return ScalarSplit(p1, p2)
+	}
+	return Scalar(p1, p2)
+}
+
+// Scalar is the core varint parsing implementation, using scalar operations
+// only.
+//
+//go:nosplit
+//go:noinline
+func Scalar(p1 impl.P1, p2 impl.P2) (impl.P1, impl.P2, uint64) {
 	// Inlined from protowire.ConsumeVarint to minimize spills and remove
 	// bounds checks.
 	var b byte
@@ -159,7 +184,7 @@ func parseVarint(p1 P1, p2 P2) (P1, P2, uint64) {
 		goto exit
 	}
 
-	p1.Fail(p2, ErrorOverflow)
+	p1.Fail(p2, tdp.ErrorOverflow)
 
 exit:
 	if debug.Enabled {
@@ -171,11 +196,6 @@ exit:
 	return p1, p2, x
 
 fail:
-	p1.Fail(p2, ErrorTruncated)
+	p1.Fail(p2, tdp.ErrorTruncated)
 	goto fail
-}
-
-//go:noinline
-func parseVarintNoinline(p1 P1, p2 P2) (P1, P2, uint64) {
-	return parseVarint(p1, p2)
 }

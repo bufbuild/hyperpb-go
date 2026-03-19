@@ -121,7 +121,12 @@ func (e *equal) any(v1, v2 any, rec bool) {
 		slices.Reverse(b1)
 		slices.Reverse(b2)
 
-		e.fail("expected %v:0x%x, got %v:0x%x (%T)", v1, b1, v2, b2, v2)
+		diff := slices.Clone(b1)
+		for i := range diff {
+			diff[i] ^= b2[i]
+		}
+
+		e.fail("expected %v:0x%x, got %v:0x%x, diff: %x (%T)", v1, b1, v2, b2, diff, v2)
 	}
 }
 

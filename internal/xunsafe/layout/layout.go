@@ -34,12 +34,12 @@ func Size[T any]() int {
 	return int(unsafe.Sizeof(z))
 }
 
-// Size returns T's size in bits.
+// Bits returns T's size in bits.
 func Bits[T any]() int {
 	return Size[T]() * 8
 }
 
-// Size returns T's alignment in bytes.
+// Align returns T's alignment in bytes.
 func Align[T any]() int {
 	var z T
 	return int(unsafe.Alignof(z))
@@ -66,7 +66,7 @@ func RoundDown[T Int](v, align T) T {
 	return v &^ (align - 1)
 }
 
-// RoundDown rounds v up to a power of two.
+// RoundUp rounds v up to a power of two.
 func RoundUp[T Int](v, align T) T {
 	return (v + align - 1) &^ (align - 1)
 }

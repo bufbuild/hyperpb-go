@@ -33,8 +33,12 @@ type Shared struct {
 	arena arena.Arena
 	lib   *tdp.Library
 
-	Src *byte
+	Src *byte // Needs to be a pointer to root the source buffer.
 	Len int
+
+	// Must *not* be a pointer, it's one-past-the-end. This points to one past the
+	// furthest address we are guaranteed to be able to load from.
+	End xunsafe.Addr[byte]
 
 	// Synchronizes calls to startParse() with this context.
 	Lock sync.Mutex

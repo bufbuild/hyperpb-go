@@ -39,7 +39,7 @@ var (
 	errInvalid = errors.New("hyperpb: invalid message")
 
 	//go:linkname hyperpbMessage buf.build/go/hyperpb/internal/tdp/profile.hyperpbMessage
-	hyperpbMessage = xunsafe.AnyType((*Message)(nil))
+	hyperpbMessage = xunsafe.TypeOf((*Message)(nil))
 )
 
 // Message implements [protoreflect.Message].
@@ -68,7 +68,7 @@ func NewMessage(ty *MessageType) *Message {
 // This function will return the approximate offset into data at which the
 // error occurred.
 func (m *Message) Unmarshal(data []byte, options ...UnmarshalOption) error {
-	opts := vm.NewOptions()
+	opts := vm.Defaults()
 	for _, opt := range options {
 		if opt.apply != nil {
 			// Avoid having opt pointlessly escape to the heap.
@@ -77,7 +77,7 @@ func (m *Message) Unmarshal(data []byte, options ...UnmarshalOption) error {
 			opt.apply(xunsafe.NoEscape(&opts))
 		}
 	}
-	return vm.Run(&m.impl, data, opts)
+	return vm.Run(&m.impl, data, &opts)
 }
 
 // Shared returns state shared by this message and its submessages.

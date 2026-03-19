@@ -34,7 +34,7 @@ func getRepeatedMessage(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) p
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 	p1, p2, m := allocRepeatedMessage(p1, p2)
 	return p1.PushMessage(p2, m)

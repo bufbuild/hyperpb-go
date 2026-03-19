@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"buf.build/go/hyperpb/internal/xerrors"
 )
@@ -37,6 +38,7 @@ var (
 	checkptr = flag.Bool("checkptr", false, "build with checkptr (crappy asan) instrumentation")
 	race     = flag.Bool("race", false, "build with -race")
 	unopt    = flag.Bool("unopt", false, "build with optimizations turned off")
+	env      = flag.String("env", "", "environment variables to set in the build, ;-separated")
 
 	benchCsv   = flag.String("csv", "", "file for benchmark csv output")
 	benchTable = flag.String("table", "", "file for benchmark table output")
@@ -67,6 +69,7 @@ func run() error {
 		checkptr: *checkptr,
 		race:     *race,
 		unopt:    *unopt,
+		env:      strings.Split(*env, ";"),
 		args:     flag.Args(),
 	}
 

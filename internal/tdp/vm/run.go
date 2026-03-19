@@ -15,12 +15,10 @@
 package vm
 
 import (
-	"fmt"
 	"math"
 	"math/bits"
 	"math/rand/v2"
 	"runtime"
-	"strings"
 	"unsafe"
 
 	"google.golang.org/protobuf/encoding/protowire"
@@ -28,122 +26,39 @@ import (
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
-	"buf.build/go/hyperpb/internal/tdp/profile"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/impl"
+	"buf.build/go/hyperpb/internal/tdp/vm/internal/options"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"buf.build/go/hyperpb/internal/zc"
 )
-
-// Options is options for [Run].
-type Options struct {
-	// Max tries before hitting the tag table.
-	MaxMisses int
-
-	// Maximum recursion depth.
-	MaxDepth int
-
-	// If set, unknown fields are discarded.
-	DiscardUnknown bool
-
-	// If set, all string fields behave as if they are defined in proto2.
-	AllowInvalidUTF8 bool
-
-	// If set, the input data will not be copied before the parse begins.
-	AllowAlias bool
-
-	// Profiler fields.
-	Recorder    *profile.Recorder
-	ProfileRate float64
-}
-
-// NewOptions returns the default settings for [Options].
-func NewOptions() Options {
-	return Options{
-		MaxMisses: 4,
-		MaxDepth:  1000,
-	}
-}
 
 // Thunk is a callback for parsing a field. This is the "true" type of
 // [tdp.FieldParser].Parser.
 type Thunk func(P1, P2) (P1, P2)
 
+// Options is options for the vm.
+type Options = options.Options
+
+// Defaults returns the default settings for [Options].
+func Defaults() options.Options { return options.Defaults() }
+
 // Run is the top-level entry point for message parsing.
-func Run(m *dynamic.Message, data []byte, options Options) (err error) {
+func Run(m *dynamic.Message, data []byte, options *options.Options) (err error) {
 	if m.Shared.Src != nil {
 		panic("hyperpb: attempted to parse message using in-use Context")
 	}
 
 	if len(data) > math.MaxUint32 {
-		return &ParseError{code: ErrorTooBig}
+		err := tdp.ErrorTooBig.ErrorAt(0)
+		return &err
 	}
 
 	if len(data) == 0 {
 		return nil
 	}
 
-	m.Shared.Lock.Lock()
-
-	p3 := p3Pool.Get()
-	p3.Options = options
-
-	data = RelocatePageBoundary(data, !p3.AllowAlias)
-	m.Shared.Src = unsafe.SliceData(data)
-	m.Shared.Len = len(data)
-	// The arena keeps m.context alive, so we don't need to KeepAlive src.
-
-	stack := stackPool.Get()
-	if cap(*stack) < p3.MaxDepth {
-		*stack = make([]frame, p3.MaxDepth)
-	}
-
-	p3.stack.top = xunsafe.AddrOf(unsafe.SliceData(*stack))
-	p3.stack.bottom = p3.stack.top.Add(p3.MaxDepth)
-
-	p3.stack.ptr = p3.stack.bottom
-
-	defer func() {
-		if p3.err.code != 0 && recover() != nil {
-			// Make a copy of the error, since pp will get re-used by a future
-			// run of this function.
-			parseErr := p3.err
-			err = &parseErr
-
-			if debug.Enabled {
-				buf := new(strings.Builder)
-				for _, frame := range p3.stackSlice() {
-					fmt.Fprintf(buf, "- %#v\n", frame)
-				}
-
-				debug.Log(nil, "fail",
-					"%v\n"+
-						"trace to fail() call:\n%s"+
-						"stack:\n%s", err, debug.Stack(6), buf)
-			}
-		}
-
-		// These would all normally go in their own defers, but having a single
-		// defer is noticeably faster.
-		stackPool.Put(stack)
-		p3Pool.Put(p3)
-		m.Shared.Lock.Unlock()
-	}()
-
-	p1 := P1{
-		shared:  xunsafe.AddrOf(m.Shared),
-		PtrAddr: xunsafe.AddrOf(m.Shared.Src),
-	}
-	p2 := P2{
-		p3Addr:  xunsafe.AddrOf(p3),
-		scratch: uint64(m.Shared.Len),
-	}
-
-	if debug.Enabled {
-		p1.Log(p2, "start", "%p:%d `%x`, %p:%v",
-			m.Shared.Src, m.Shared.Len, data, m.Type(), m.Type().Descriptor.FullName())
-	}
-
-	p1, p2 = p1.PushMessage(p2, m)
-	p1, p2 = p1.SetScratch(p2, 0)
+	p1, p2 := impl.New(data, m, options)
+	defer p2.P3().Done(m.Shared, &err)
 	loop(p1, p2)
 
 	if rand.Float64() < options.ProfileRate && options.Recorder != nil {
@@ -157,13 +72,13 @@ func Run(m *dynamic.Message, data []byte, options Options) (err error) {
 // loop is the core parser loop. This function is not recursive.
 func loop(p1 P1, p2 P2) {
 	// Need this to match the ABI of returning from a thunk.
-	p2.fieldAddr = p2.Field().NextOk
+	p2.FieldAddr = p2.Field().NextOk
 
 checkDone:
 	if p1.Len() == 0 {
-		if p1.endGroup != notAGroup {
+		if p1.EndGroup != impl.NotAGroup {
 			// If we run out of buffer while we're still
-			p1.Fail(p2, ErrorEndGroup)
+			p1.Fail(p2, tdp.ErrorEndGroup)
 		}
 		goto pop
 	}
@@ -213,7 +128,7 @@ number:
 			p1.Log(p2, "small tag", "%v -> %#x", tdp.Tag(p2.Scratch()), offset)
 
 			if offset != 0xff {
-				p2.fieldAddr = xunsafe.AddrOf(t.Fields().Get(int(offset)))
+				p2.FieldAddr = xunsafe.AddrOf(t.Fields().Get(int(offset)))
 				goto parseField
 			}
 			goto field
@@ -258,7 +173,7 @@ number:
 
 field:
 	{
-		tries := p2.p3().MaxMisses
+		tries := p2.P3().MaxMisses
 		tag := tdp.Tag(p2.Scratch())
 
 		for {
@@ -274,7 +189,7 @@ field:
 				break
 			}
 
-			p2.fieldAddr = p2.Field().NextErr
+			p2.FieldAddr = p2.Field().NextErr
 
 			tries--
 			if tries == 0 {
@@ -293,15 +208,15 @@ parseField:
 		xunsafe.Ping(p1.Shared())
 
 		thunk := (*xunsafe.PC[Thunk])(&p2.Field().Parse).Get()
-		p1.Log(p2, "call", "%v, %#x", debug.Func(thunk), p2.fieldAddr)
+		p1.Log(p2, "call", "%v, %#x", debug.Func(thunk), p2.FieldAddr)
 
 		// NOTE: Thunks are allowed to rely on p2.Scratch() still containing
 		// the full field tag!
 		p1, p2 = thunk(p1, p2)
 
-		p1.Log(p2, "ret", "%v, %#x", debug.Func(thunk), p2.fieldAddr)
+		p1.Log(p2, "ret", "%v, %#x", debug.Func(thunk), p2.FieldAddr)
 
-		p2.fieldAddr = p2.Field().NextOk
+		p2.FieldAddr = p2.Field().NextOk
 
 		p1, p2 = p1.SetScratch(p2, 0) // Make sure no one relies on this being preserved.
 		goto checkDone
@@ -312,7 +227,7 @@ missedField:
 		tag := tdp.Tag(p2.Scratch())
 		p1, p2 = p1.SetScratch(p2, 0) // Make sure no one relies on this being preserved.
 
-		if tag == p1.endGroup {
+		if tag == p1.EndGroup {
 			p1.Log(p2, "end group", "%v", tag)
 			goto pop
 		}
@@ -320,10 +235,10 @@ missedField:
 
 		// Check for tag overflow.
 		if tag.Overflows() {
-			p1.Fail(p2, ErrorOverflow)
+			p1.Fail(p2, tdp.ErrorOverflow)
 		}
 
-		// Finish parsing number into a varint.
+		// Finish parsing number into a
 		// This is a manual inlining of tag.decode.
 		mask := tdp.Tag(0x7f)
 		i := 0
@@ -349,7 +264,7 @@ missedField:
 		_, _ = i, mask
 
 		// Check if we know about this field number.
-		p1, p2, tag2 = p1.byTag(p2, tag2)
+		p1, p2, tag2 = p1.ByTag(p2, tag2)
 		if p2.Field() != nil {
 			p1.Log(p2, "goto field", "%d", tag2)
 			goto parseField
@@ -364,9 +279,9 @@ missedField:
 			}
 
 			p1, p2 = p1.SetScratch(p2, uint64(p1.PtrAddr))
-			p1, p2, tag2 = p1.Varint(p2)
+			p1, p2, tag2 = Varint64(p1, p2)
 			if tag2 > math.MaxInt32<<3 {
-				p1.Fail(p2, ErrorOverflow)
+				p1.Fail(p2, tdp.ErrorOverflow)
 			}
 
 			if protowire.Type(tag2&0b111) == protowire.EndGroupType {
@@ -374,13 +289,13 @@ missedField:
 				// great way to check if this is the end tag for the group
 				// we're in at this position, so we just send this to the main
 				// parsing loop.
-				p2.fieldAddr = p2.Type().Entrypoint.NextOk
+				p2.FieldAddr = p2.Type().Entrypoint.NextOk
 				p1.PtrAddr = xunsafe.Addr[byte](p2.Scratch())
 				p1.Log(p2, "goto end group", "%d", tag2)
 				goto number
 			}
 
-			p1, p2, tag2 = p1.byTag(p2, tag2)
+			p1, p2, tag2 = p1.ByTag(p2, tag2)
 			if p2.Field() != nil {
 				p1.PtrAddr = xunsafe.Addr[byte](p2.Scratch())
 				p1.Log(p2, "goto number", "%d", tag2)
@@ -392,7 +307,7 @@ missedField:
 pop:
 	{
 		var done bool
-		p1, p2, done = p1.pop(p2)
+		p1, p2, done = p1.Pop(p2)
 		if done {
 			return
 		}
@@ -402,7 +317,7 @@ pop:
 truncated:
 	// Route all failures in loop() here to force Go to schedule them as the
 	// cold side of the branch leading to it.
-	p1.Fail(p2, ErrorTruncated)
+	p1.Fail(p2, tdp.ErrorTruncated)
 }
 
 // handleUnknown handles an handleUnknown field with the given tag. Outlined to improve
@@ -411,7 +326,7 @@ truncated:
 //go:noinline
 func handleUnknown(p1 P1, p2 P2, tag uint64) (P1, P2) {
 	if tag&^0xffffffff != 0 {
-		p1.Fail(p2, ErrorOverflow)
+		p1.Fail(p2, tdp.ErrorOverflow)
 	}
 
 	// Rewind the stream to find the start offset of this field. We can do this
@@ -426,11 +341,11 @@ func handleUnknown(p1 P1, p2 P2, tag uint64) (P1, P2) {
 	start = start.Add(1 - protowire.SizeVarint(tag))
 
 	p1, p2 = p1.SetScratch(p2, tag)
-	p1, p2 = skipRecord(p1, p2, p2.p3().MaxDepth)
+	p1, p2 = skipRecord(p1, p2, p2.P3().MaxDepth)
 	n := int(p1.PtrAddr - start)
 	p1.Log(p2, "unknown", "%d bytes", n)
 
-	if !p2.p3().DiscardUnknown && !p2.Type().DiscardUnknown {
+	if !p2.P3().DiscardUnknown && !p2.Type().DiscardUnknown {
 		r := zc.New(p1.Src(), start.AssertValid(), n)
 		cold := p2.Message().MutableCold()
 		if cold.Unknown.Len() > 0 {
@@ -453,28 +368,28 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 	p1.Log(p2, "skipping", "%d, %d", num, ty)
 
 	if num == 0 {
-		p1.Fail(p2, ErrorFieldNumber)
+		p1.Fail(p2, tdp.ErrorFieldNumber)
 	}
 
 	switch ty {
 	case protowire.VarintType:
-		p1, p2, _ = p1.Varint(p2)
+		p1, p2, _ = Varint64(p1, p2)
 	case protowire.BytesType:
-		p1, p2, _ = p1.Bytes(p2)
+		p1, p2, _ = Bytes(p1, p2)
 	case protowire.Fixed32Type:
-		p1, p2, _ = p1.Fixed32(p2)
+		p1, p2, _ = Fixed32(p1, p2)
 	case protowire.Fixed64Type:
-		p1, p2, _ = p1.Fixed64(p2)
+		p1, p2, _ = Fixed64(p1, p2)
 
 	case protowire.StartGroupType:
 		if depth < 0 {
-			p1.Fail(p2, ErrorRecursionDepth)
+			p1.Fail(p2, tdp.ErrorRecursionDepth)
 		}
 
 		end := protowire.EncodeTag(num, protowire.EndGroupType)
 		for {
 			var raw uint64
-			p1, p2, raw = p1.Varint(p2)
+			p1, p2, raw = Varint64(p1, p2)
 
 			if raw == end {
 				break
@@ -485,9 +400,9 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 		}
 
 	case protowire.EndGroupType:
-		p1.Fail(p2, ErrorEndGroup)
+		p1.Fail(p2, tdp.ErrorEndGroup)
 	default:
-		p1.Fail(p2, ErrorReserved)
+		p1.Fail(p2, tdp.ErrorReserved)
 	}
 
 	return p1, p2
@@ -500,17 +415,17 @@ func skipRecord(p1 P1, p2 P2, depth int) (P1, P2) {
 func checkLargeVarint(p1 P1, p2 P2) (P1, P2) {
 	p1.Log(p2, "check large", "")
 
-	// This is a very large varint. We need to check the next two words.
+	// This is a very large  We need to check the next two words.
 	// This is a slow path, so we can afford to not be efficient.
 	switch xunsafe.Load(p1.Ptr(), -1) {
 	case 0x00:
 	case 0x80:
 		if *p1.Ptr() != 0x00 {
-			p1.Fail(p2, ErrorOverflow)
+			p1.Fail(p2, tdp.ErrorOverflow)
 		}
 		p1 = p1.Advance(1)
 	default:
-		p1.Fail(p2, ErrorOverflow)
+		p1.Fail(p2, tdp.ErrorOverflow)
 	}
 
 	return p1, p2

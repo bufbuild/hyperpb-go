@@ -258,10 +258,10 @@ func getMessage(m *dynamic.Message, ty *tdp.Type, getter *tdp.Accessor) protoref
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
-//hyperpb:stencil parseVarint32 parseVarint[uint32] StoreFromScratch -> StoreFromScratch32
+//hyperpb:stencil parseVarint32 parseVarint[uint32] StoreFromScratch -> StoreFromScratch32 vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parseVarint64 parseVarint[uint64] StoreFromScratch -> StoreFromScratch64
 func parseVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 
 	var p *T
 	p1, p2, p = vm.GetMutableField[T](p1, p2)
@@ -272,10 +272,10 @@ func parseVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
-//hyperpb:stencil parseZigZag32 parseZigZag[uint32] StoreFromScratch -> StoreFromScratch32
+//hyperpb:stencil parseZigZag32 parseZigZag[uint32] StoreFromScratch -> StoreFromScratch32 vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parseZigZag64 parseZigZag[uint64] StoreFromScratch -> StoreFromScratch64
 func parseZigZag[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	p1, p2 = vm.P1.SetScratch(p1.Varint(p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[T](p2.Scratch())))
 
 	var p *T
@@ -290,7 +290,7 @@ func parseZigZag[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 //hyperpb:stencil parseFixed64 parseFixed[uint64]
 func parseFixed[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	if p1.Len() < layout.Size[T]() {
-		p1.Fail(p2, vm.ErrorTruncated)
+		p1.Fail(p2, tdp.ErrorTruncated)
 	}
 	var p *T
 	p1, p2, p = vm.GetMutableField[T](p1, p2)
@@ -303,7 +303,7 @@ func parseFixed[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseString(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var r zc.Range
-	p1, p2, r = p1.UTF8(p2)
+	p1, p2, r = vm.UTF8(p1, p2)
 	p1, p2 = p1.SetScratch(p2, uint64(r))
 
 	var p *zc.Range
@@ -316,7 +316,7 @@ func parseString(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var r zc.Range
-	p1, p2, r = p1.Bytes(p2)
+	p1, p2, r = vm.Bytes(p1, p2)
 	p1, p2 = p1.SetScratch(p2, uint64(r))
 
 	var p *zc.Range
@@ -329,7 +329,7 @@ func parseBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = vm.Varint32(p1, p2)
 	p2.Message().SetBit(p2.Field().Offset.Bit, n != 0)
 
 	return p1, p2
@@ -338,7 +338,7 @@ func parseBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	p1, p2 = p1.SetScratch(p2, uint64(n))
 
 	var mp **dynamic.Message

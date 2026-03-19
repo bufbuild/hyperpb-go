@@ -19,7 +19,7 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/compiler"
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/tdp/profile"
-	"buf.build/go/hyperpb/internal/tdp/vm"
+	"buf.build/go/hyperpb/internal/tdp/vm/memory"
 	"buf.build/go/hyperpb/internal/xflag"
 	"buf.build/go/hyperpb/internal/xunsafe"
 	"github.com/protocolbuffers/protoscope"
@@ -261,7 +261,7 @@ func parseTestCase(t testing.TB, path string, file []byte) *TestCase {
 		for i := range test.Specimens {
 			// Avoid confounding between the normal/zerocopy benchmarks by
 			// making sure we have optimal message placement before we start.
-			test.Specimens[i] = vm.RelocatePageBoundary(test.Specimens[i], false)
+			test.Specimens[i], _ = memory.RelocatePageBoundary(test.Specimens[i], false, 15)
 		}
 	}
 

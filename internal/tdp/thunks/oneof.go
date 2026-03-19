@@ -271,7 +271,7 @@ func parseOneofBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 func parseOneofBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = vm.Varint32(p1, p2)
 	if n != 0 {
 		n = 1
 	}

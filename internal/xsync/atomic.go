@@ -38,7 +38,7 @@ func (x *AtomicFloat64) Swap(val float64) (old float64) {
 	return math.Float64frombits((*atomic.Uint64)(x).Swap(math.Float64bits(val)))
 }
 
-// Swap atomically stores the given float64 if x currently holds a float with
+// BitwiseCompareAndSwap atomically stores the given float64 if x currently holds a float with
 // the same bit-pattern as val.
 //
 // That is to say, this does *not* perform a floating-point comparison!

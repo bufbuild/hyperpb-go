@@ -37,7 +37,7 @@ import (
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
-// CompileOption is a configuration setting for [Compile].
+// Options is a configuration setting for [Compile].
 type Options struct {
 	Profile    profile.Profile
 	Extensions ExtensionResolver
@@ -452,7 +452,7 @@ func (c *compiler) codegen(ir *ir) {
 	)
 	mpf.Push(tdp.FieldParser{
 		Tag:   mapValue,
-		Parse: uintptr(xunsafe.NewPC(vm.Thunk(vm.P1.ParseMapEntry))),
+		Parse: uintptr(xunsafe.NewPC(vm.Thunk(vm.ParseMapEntry))),
 	})
 
 	// Write the fast-lookup lut.

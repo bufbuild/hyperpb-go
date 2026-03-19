@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package unsafe provides a more convenient interface for performing unsafe
+// Package xunsafe provides a more convenient interface for performing unsafe
 // operations than Go's built-in package unsafe.
 package xunsafe
 

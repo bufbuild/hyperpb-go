@@ -226,12 +226,12 @@ func getRepeatedBytes(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) pro
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
-//hyperpb:stencil parseRepeatedVarint8 parseRepeatedVarint[uint8] appendVarint -> appendVarint8
-//hyperpb:stencil parseRepeatedVarint32 parseRepeatedVarint[uint32] appendVarint -> appendVarint32
+//hyperpb:stencil parseRepeatedVarint8 parseRepeatedVarint[uint8] appendVarint -> appendVarint8 vm.Varint64 -> vm.Varint32
+//hyperpb:stencil parseRepeatedVarint32 parseRepeatedVarint[uint32] appendVarint -> appendVarint32 vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parseRepeatedVarint64 parseRepeatedVarint[uint64] appendVarint -> appendVarint64
 func parseRepeatedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
-	p1, p2, n = p1.Varint(p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, T]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, T]](p1, p2)
@@ -271,12 +271,12 @@ func parseRepeatedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
 //go:norace // Race instrumentation causes this function to fail the nosplit check.
-//hyperpb:stencil parsePackedVarint8 parsePackedVarint[uint8]
-//hyperpb:stencil parsePackedVarint32 parsePackedVarint[uint32]
+//hyperpb:stencil parsePackedVarint8 parsePackedVarint[uint8] vm.Varint64 -> vm.Varint32
+//hyperpb:stencil parsePackedVarint32 parsePackedVarint[uint32] vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parsePackedVarint64 parsePackedVarint[uint64]
 func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
@@ -376,7 +376,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = p1.Varint(p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = T(x)
@@ -390,7 +390,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = p1.Varint(p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = T(x)
 			p = p.Add(1)
@@ -412,12 +412,12 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 //go:nosplit
 func parseRepeatedFixed32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	return appendFixed32(p1.Fixed32(p2))
+	return appendFixed32(vm.Fixed32(p1, p2))
 }
 
 //go:nosplit
 func parseRepeatedFixed64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	return appendFixed64(p1.Fixed64(p2))
+	return appendFixed64(vm.Fixed64(p1, p2))
 }
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
@@ -459,14 +459,14 @@ func appendFixed[T uint32 | uint64](p1 vm.P1, p2 vm.P2, v T) (vm.P1, vm.P2) {
 //hyperpb:stencil parsePackedFixed64 parsePackedFixed[uint64]
 func parsePackedFixed[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
-	p1, p2, n = p1.LengthPrefix(p2)
+	p1, p2, n = vm.LengthPrefix(p1, p2)
 	if n == 0 {
 		return p1, p2
 	}
 
 	size := layout.Size[T]()
 	if n%size != 0 {
-		p1.Fail(p2, vm.ErrorTruncated)
+		p1.Fail(p2, tdp.ErrorTruncated)
 	}
 
 	var r *repeated.Scalars[T, T]
@@ -519,7 +519,7 @@ exit:
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var v zc.Range
-	p1, p2, v = p1.Bytes(p2)
+	p1, p2, v = vm.Bytes(p1, p2)
 
 	var r *repeated.Bytes
 	p1, p2, r = vm.GetMutableField[repeated.Bytes](p1, p2)
@@ -538,7 +538,7 @@ func parseRepeatedBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 func parseRepeatedUTF8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var v zc.Range
-	p1, p2, v = p1.UTF8(p2)
+	p1, p2, v = vm.UTF8(p1, p2)
 
 	var r *repeated.Strings
 	p1, p2, r = vm.GetMutableField[repeated.Strings](p1, p2)

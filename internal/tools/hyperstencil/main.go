@@ -25,6 +25,8 @@
 //
 // Generated functions are placed in a file called _stencils.go. All files in
 // a package are processed in one go.
+//
+//nolint:gosec
 package main
 
 import (
@@ -35,6 +37,7 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -55,6 +58,7 @@ import (
 var (
 	directive = regexp.MustCompile(`^//hyperpb:stencil\s+(\w+)\s+([\w.]+)\s*\[(.+)\]\s*(:?(\w+\s*->\s*[\w.]+\s*)*)`)
 	rename    = regexp.MustCompile(`(\w+)\s*->\s*([\w.]+)`)
+	filename  = regexp.MustCompile(`stencils(_test)?(\.\d+)?\.go`)
 
 	toolPkg = func() string {
 		info, _ := debug.ReadBuildInfo()
@@ -213,28 +217,31 @@ func makeStencil(
 			}
 
 		case *ast.CallExpr:
-			if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
+			switch callee := n.Fun.(type) {
+			case *ast.SelectorExpr:
 				// Special case for calling a method that is in the renames
 				// array.
-				if arg, ok := dir.Renames[sel.Sel.Name]; ok {
+				if arg, ok := dir.Renames[callee.Sel.Name]; ok {
 					// Rewrite the function expression to an identifier.
 					n.Fun = &ast.Ident{Name: arg}
 
 					// Append the selectee as the first argument of the call.
-					n.Args = slices.Insert(n.Args, 0, sel.X)
+					n.Args = slices.Insert(n.Args, 0, callee.X)
+					break
 				}
-			} else if idx, ok := n.Fun.(*ast.IndexExpr); ok {
-				// Special case for calling a generic function.
-				if sel, ok := idx.X.(*ast.SelectorExpr); ok {
-					if arg, ok := dir.Renames[sel.Sel.Name]; ok {
-						// Rewrite the call to be non-generic.
-						sel.Sel.Name = arg
-						n.Fun = sel
+
+				// Check for the selector + the function being in the renames
+				// array.
+				if id, ok := callee.X.(*ast.Ident); ok {
+					if arg, ok := dir.Renames[id.Name+"."+callee.Sel.Name]; ok {
+						// Rewrite the function expression to an identifier.
+						n.Fun = &ast.Ident{Name: arg}
 					}
 				}
-			} else if idx, ok := n.Fun.(*ast.IndexExpr); ok {
+
+			case *ast.IndexExpr:
 				// Special case for calling a generic function.
-				if sel, ok := idx.X.(*ast.SelectorExpr); ok {
+				if sel, ok := callee.X.(*ast.SelectorExpr); ok {
 					if arg, ok := dir.Renames[sel.Sel.Name]; ok {
 						// Rewrite the call to be non-generic.
 						sel.Sel.Name = arg
@@ -311,20 +318,24 @@ func run() error {
 	}
 
 	isTest := strings.HasSuffix(path, "_test.go")
-	outPath := "stencils.go"
-	if isTest {
-		outPath = "stencils_test.go"
-	}
-	outPath = filepath.Join(dirname, outPath)
 
 	// Check to see if this file is newer than the files it depends on to avoid
 	// needing to regenerate.
 	var mtime time.Time
-	if info, err := os.Stat(outPath); err == nil {
-		mtime = info.ModTime()
+	for _, file := range dir {
+		if !filename.MatchString(filepath.Base(file.Name())) {
+			continue
+		}
+
+		if info, err := file.Info(); err == nil {
+			t := info.ModTime()
+			if mtime.IsZero() || mtime.After(t) {
+				mtime = t
+			}
+		}
 	}
 
-	var files []string //nolint:prealloc
+	var files []string
 	var newer bool
 	for _, dirent := range dir {
 		if dirent.Type().IsDir() ||
@@ -347,11 +358,9 @@ func run() error {
 	slices.Sort(files)
 
 	var (
-		out  = ast.File{Name: ast.NewIdent("x")}
 		fset = token.NewFileSet()
 
 		imports  xsync.Map[string, *ast.ImportSpec]
-		bases    xsync.Set[string]
 		attrs    xsync.Map[string, []string]
 		pkgCache xsync.Map[string, []*packages.Package]
 	)
@@ -365,12 +374,16 @@ func run() error {
 		}
 	}()
 
+	type output struct {
+		tags  string
+		decls []ast.Decl
+		bases xsync.Set[string]
+	}
+
 	// Stenciling isn't super fast; parallelizing it helps a lot.
-	decls := make([][]ast.Decl, len(files))
+	outs := make([]output, len(files))
 	for i, path := range files {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			file, err := parser.ParseFile(fset, path, nil, parser.ParseComments|parser.SkipObjectResolution)
 			if err != nil {
 				ch <- fmt.Errorf("%s:%w", path, err)
@@ -388,6 +401,11 @@ func run() error {
 				}
 
 				path, _ := strconv.Unquote(imp.Path.Value)
+				if path == "simd/archsimd" { // Bug?
+					imports.Store("archsimd", imp)
+					continue
+				}
+
 				pkgs, ok := pkgCache.Load(path)
 				if !ok {
 					pkgs, err = packages.Load(nil, path)
@@ -435,27 +453,37 @@ func run() error {
 
 			directives := parseDirectives(file)
 
-			decls := &decls[i]
-			*decls = make([]ast.Decl, len(directives))
+			out := &outs[i]
+			*out = output{
+				decls: make([]ast.Decl, len(directives)),
+			}
+
+		buildTag:
+			for _, c := range file.Comments {
+				for _, c := range c.List {
+					tags, ok := strings.CutPrefix(c.Text, "//go:build ")
+					if ok {
+						out.tags = tags
+						break buildTag
+					}
+				}
+			}
 
 			for i, dir := range directives {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
+				wg.Go(func() {
 					// Start by finding a func in file with this name.
 					generic := funcs[dir.Source]
-					stencil, err := makeStencil(dir, generic, &bases, &attrs)
+					stencil, err := makeStencil(dir, generic, &out.bases, &attrs)
 					if err != nil {
 						ch <- err
 						return
 					}
 
 					// Finally, append stencil to the output file.
-					(*decls)[i] = stencil
-				}()
+					out.decls[i] = stencil
+				})
 			}
-		}()
+		})
 	}
 
 	wg.Wait()
@@ -464,54 +492,104 @@ func run() error {
 		return errs[0]
 	}
 
-	out.Decls = slices.Concat(decls...)
-
-	var imported []string
-	for base := range bases.All() {
-		imp, ok := imports.Load(base)
-		if ok {
-			imported = append(imported, imp.Path.Value)
-		}
+	// Figure out how many output files we need based on build tags we found.
+	tagMap := make(map[string][]*output)
+	for i := range outs {
+		out := &outs[i]
+		tagMap[out.tags] = append(tagMap[out.tags], out)
 	}
-	slices.SortFunc(imported, func(a, b string) int {
-		stdA, stdB := !strings.Contains(a, "."), !strings.Contains(b, ".")
-		if stdA && !stdB {
-			return -1
-		}
-		if stdB && !stdA {
-			return 1
-		}
 
-		return cmp.Compare(a, b)
+	groups := slices.Collect(maps.Values(tagMap))
+	groups = slices.DeleteFunc(groups, func(s []*output) bool {
+		for _, v := range s {
+			if len(v.decls) > 0 {
+				return false
+			}
+		}
+		return true
+	})
+	slices.SortFunc(groups, func(a, b []*output) int {
+		return cmp.Compare(a[0].tags, b[0].tags)
 	})
 
-	// Generating this in the AST is far too painful.
-	header := fmt.Sprintf(`// Code generated by %s. DO NOT EDIT.
+	for i, group := range groups {
+		bases := make(map[string]struct{})
+		for _, out := range group {
+			for base := range out.bases.All() {
+				bases[base] = struct{}{}
+			}
+		}
 
-package %s
+		var imported []string
+		for base := range bases {
+			imp, ok := imports.Load(base)
+			if ok {
+				imported = append(imported, imp.Path.Value)
+			}
+		}
+		slices.SortFunc(imported, func(a, b string) int {
+			stdA, stdB := !strings.Contains(a, "."), !strings.Contains(b, ".")
+			if stdA && !stdB {
+				return -1
+			}
+			if stdB && !stdA {
+				return 1
+			}
+
+			return cmp.Compare(a, b)
+		})
+
+		out := ast.File{Name: ast.NewIdent("x")}
+		for _, output := range group {
+			out.Decls = append(out.Decls, output.decls...)
+		}
+
+		var build string
+		if tags := group[0].tags; tags != "" {
+			build = fmt.Sprintf("//go:build %s\n", tags)
+		}
+
+		// Generating this in the AST is far too painful.
+		header := fmt.Sprintf(`// Code generated by %s. DO NOT EDIT.
+
+%spackage %s
 
 import (%s)
 
-`, toolPkg, pkg, strings.Join(imported, ";"))
+`, toolPkg, build, pkg, strings.Join(imported, ";"))
 
-	// Print to a string, so that we can add nosplit comments the "easy" way.
-	buf := new(strings.Builder)
-	if err := printer.Fprint(buf, fset, &out); err != nil {
-		return err
-	}
-	source := buf.String()
+		// Print to a string, so that we can add nosplit comments the "easy" way.
+		buf := new(strings.Builder)
+		if err := printer.Fprint(buf, fset, &out); err != nil {
+			return err
+		}
+		source := buf.String()
 
-	oldnew := []string{"package x\n", header}
-	for name, attrs := range attrs.All() {
-		oldnew = append(oldnew, "func "+name, strings.Join(attrs, "\n")+"\nfunc "+name)
-	}
-	source = strings.NewReplacer(oldnew...).Replace(source)
-	bytes, err := format.Source([]byte(source))
-	if err != nil {
-		return err
+		oldnew := []string{"package x\n", header}
+		for name, attrs := range attrs.All() {
+			oldnew = append(oldnew, "func "+name, strings.Join(attrs, "\n")+"\nfunc "+name)
+		}
+		source = strings.NewReplacer(oldnew...).Replace(source)
+		bytes, err := format.Source([]byte(source))
+		if err != nil {
+			return err
+		}
+
+		name := "stencils"
+		if isTest {
+			name = "stencils_test"
+		}
+		if len(groups) > 1 {
+			name = fmt.Sprintf("%s.%d", name, i+1)
+		}
+		name += ".go"
+
+		if err := os.WriteFile(filepath.Join(dirname, name), bytes, 0o666); err != nil {
+			return err
+		}
 	}
 
-	return os.WriteFile(outPath, bytes, 0o666)
+	return nil
 }
 
 type visitor func(visitor, ast.Node) ast.Visitor
