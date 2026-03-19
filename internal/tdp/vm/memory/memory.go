@@ -15,6 +15,8 @@
 package memory
 
 import (
+	"unsafe"
+
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
@@ -41,11 +43,13 @@ const PageBoundary = 0x1000
 // Exported for use by benchmarks.
 //
 //go:nosplit
-func RelocatePageBoundary(data []byte, force bool, extra int) []byte {
+func RelocatePageBoundary(data []byte, force bool, extra int) ([]byte, xunsafe.Addr[byte]) {
+	end := xunsafe.AddrOf(unsafe.SliceData(data)).Add(cap(data))
+	furthest := end.RoundUpTo(PageBoundary)
 	if !force {
 		// Check if there is capacity to spare.
 		if cap(data)-len(data) >= extra {
-			return data
+			return data, furthest
 		}
 
 		// If not, we need to check if there is a page boundary beyond this
@@ -53,10 +57,14 @@ func RelocatePageBoundary(data []byte, force bool, extra int) []byte {
 		if xunsafe.EndOf(data).Padding(PageBoundary) >= extra {
 			// All good, we have nine or more bytes ahead of us before the next
 			// page boundary.
-			return data
+			return data, furthest
 		}
 	}
 
 	// Copy to a new slice with just enough capacity.
-	return append(data[:cap(data)], make([]byte, 9)...)[:len(data):cap(data)]
+	data = append(data[:cap(data)], make([]byte, extra)...)[:len(data):cap(data)]
+	end = xunsafe.AddrOf(unsafe.SliceData(data)).Add(cap(data))
+	furthest = end.RoundUpTo(PageBoundary)
+
+	return data, furthest
 }

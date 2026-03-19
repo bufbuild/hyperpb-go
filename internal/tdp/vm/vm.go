@@ -111,6 +111,8 @@ func Bytes(p1 P1, p2 P2) (P1, P2, zc.Range) {
 }
 
 // UTF8 parses a length-delimited byte buffer, and validates it for UTF8.
+//
+// Does not preserve p2.Scratch().
 func UTF8(p1 P1, p2 P2) (P1, P2, zc.Range) {
 	if p2.P3().AllowInvalidUTF8 {
 		return Bytes(p1, p2)

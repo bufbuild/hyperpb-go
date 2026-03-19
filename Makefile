@@ -43,9 +43,6 @@ GOEXPERIMENT ?= simd
 HOST_ENV ?= GOTOOLCHAIN=$(GOTOOLCHAIN) GOEXPERIMENT=$(GOEXPERIMENT)
 EXEC_ENV ?= GOOS=$(GOOS) GOARCH=$(GOARCH) GOAMD64=$(GOAMD64) GOARM64=$(GOARM64) GOTOOLCHAIN=$(GOTOOLCHAIN) GOEXPERIMENT=$(GOEXPERIMENT)
 
-# Go will carelessly pick these up on host-side builds if we don't unexport them.
-unexport GOOS
-unexport GOARCH
 
 HYPERTESTFLAGS ?=
 TESTFLAGS ?=
@@ -53,14 +50,14 @@ BENCHFLAGS ?= -test.benchmem
 
 GO ?= go
 HOST_TARGET ?=
-GO_HOST := $(HOST_TARGET) $(GO)
+GO_HOST := $(HOST_ENV) $(GO)
 GO := $(EXEC_ENV) $(GO)
 
 TOOLS := ./internal/tools/external/go.mod
-TEST := $(GO_HOST) tool hypertest -o $(TESTS) $(HYPERTESTFLAGS)
+TEST := $(GO_HOST) tool hypertest -o $(TESTS) -env "GOOS=$(GOOS);GOARCH=$(GOARCH);GOAMD64=$(GOAMD64);GOARM64=$(GOARM64)" $(HYPERTESTFLAGS)
 DUMP := $(GO_HOST) tool hyperdump
 LINT := $(GO_HOST) tool -modfile $(TOOLS) golangci-lint
-BUF := $(GO_HOST) tool -modfile $(TOOLS)
+BUF := $(GO_HOST) tool -modfile $(TOOLS) buf
 
 TAGS ?= ""
 REMOTE ?= ""
@@ -77,6 +74,10 @@ else
 	PKGS := $(PKG)
 endif
 PKG ?= .
+
+# Go will carelessly pick these up on host-side builds if we don't unexport them.
+unexport GOOS
+unexport GOARCH
 
 .PHONY: help
 help: ## Describe useful make targets

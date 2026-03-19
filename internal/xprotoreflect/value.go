@@ -66,7 +66,7 @@ func ValueOfScalar(v any) protoreflect.Value {
 func GetInt[T Int](v protoreflect.Value) T {
 	var z T
 	r := unwrapValue(v)
-	if r.typ != xunsafe.AnyType(z) {
+	if r.typ != xunsafe.TypeOf(z) {
 		panic(typeMismatch(protoreflect.ValueOf(z), v))
 	}
 
@@ -77,7 +77,7 @@ func GetInt[T Int](v protoreflect.Value) T {
 // type is not a string.
 func GetString(v protoreflect.Value) string {
 	r := unwrapValue(v)
-	if r.typ != xunsafe.AnyType("") {
+	if r.typ != xunsafe.TypeOf("") {
 		panic(typeMismatch(protoreflect.ValueOf(""), v))
 	}
 
@@ -138,7 +138,7 @@ func Map(v protoreflect.Value) protoreflect.Map {
 
 // UnsafeUnwrap unwraps a [protoreflect.Value] into a raw pointer, checking
 // that it has a particular type.
-func UnsafeUnwrap(v protoreflect.Value, ty uintptr) unsafe.Pointer {
+func UnsafeUnwrap(v protoreflect.Value, ty xunsafe.Type) unsafe.Pointer {
 	r := unwrapValue(v)
 	if r.typ != ty {
 		return nil
@@ -148,10 +148,7 @@ func UnsafeUnwrap(v protoreflect.Value, ty uintptr) unsafe.Pointer {
 
 // rawValue matches the layout of protoreflect.Value exactly.
 type rawValue struct {
-	// It is slightly funny that they store typ as an unsafe.Pointer, since most
-	// of the runtime stores itabs as uintptrs, because all itabs live in
-	// permanent memory.
-	typ  uintptr
+	typ  xunsafe.Type
 	data *byte
 	num  uint64
 }

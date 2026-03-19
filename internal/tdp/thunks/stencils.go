@@ -8226,7 +8226,7 @@ insert:
 func parseRepeatedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint8]
 	var n uint64
-	p1, p2, n = varint32(p1, p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, uint8]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, uint8]](p1, p2)
@@ -8263,7 +8263,7 @@ func parseRepeatedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseRepeatedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint32]
 	var n uint64
-	p1, p2, n = varint32(p1, p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, uint32]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, uint32]](p1, p2)
@@ -8300,7 +8300,7 @@ func parseRepeatedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 func parseRepeatedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseRepeatedVarint[uint64]
 	var n uint64
-	p1, p2, n = varint64(p1, p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, uint64]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, uint64]](p1, p2)
@@ -8430,7 +8430,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = varint64(p1, p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = uint8(x)
@@ -8444,7 +8444,7 @@ func parsePackedVarint8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = varint64(p1, p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = uint8(x)
 			p = p.Add(1)
@@ -8559,7 +8559,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = varint64(p1, p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = uint32(x)
@@ -8573,7 +8573,7 @@ func parsePackedVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = varint64(p1, p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = uint32(x)
 			p = p.Add(1)
@@ -8688,7 +8688,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = varint64(p1, p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = uint64(x)
@@ -8702,7 +8702,7 @@ func parsePackedVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = varint64(p1, p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = uint64(x)
 			p = p.Add(1)
@@ -8895,7 +8895,7 @@ exit:
 }
 func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseVarint[uint32]
-	p1, p2 = vm.P1.SetScratch(varint32(p1, p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 
 	var p *uint32
 	p1, p2, p = vm.GetMutableField[uint32](p1, p2)
@@ -8905,7 +8905,7 @@ func parseVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseVarint[uint64]
-	p1, p2 = vm.P1.SetScratch(varint64(p1, p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 
 	var p *uint64
 	p1, p2, p = vm.GetMutableField[uint64](p1, p2)
@@ -8916,7 +8916,7 @@ func parseVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint32]
-	p1, p2 = vm.P1.SetScratch(varint32(p1, p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint32](p2.Scratch())))
 
 	var p *uint32
@@ -8927,7 +8927,7 @@ func parseZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 func parseZigZag64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	_ = parseZigZag[uint64]
-	p1, p2 = vm.P1.SetScratch(varint64(p1, p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[uint64](p2.Scratch())))
 
 	var p *uint64

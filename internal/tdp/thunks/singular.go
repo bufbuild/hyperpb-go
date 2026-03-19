@@ -258,10 +258,10 @@ func getMessage(m *dynamic.Message, ty *tdp.Type, getter *tdp.Accessor) protoref
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
-//hyperpb:stencil parseVarint32 parseVarint[uint32] StoreFromScratch -> StoreFromScratch32 varint64 -> varint32
+//hyperpb:stencil parseVarint32 parseVarint[uint32] StoreFromScratch -> StoreFromScratch32 vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parseVarint64 parseVarint[uint64] StoreFromScratch -> StoreFromScratch64
 func parseVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	p1, p2 = vm.P1.SetScratch(varint64(p1, p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 
 	var p *T
 	p1, p2, p = vm.GetMutableField[T](p1, p2)
@@ -272,10 +272,10 @@ func parseVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
-//hyperpb:stencil parseZigZag32 parseZigZag[uint32] StoreFromScratch -> StoreFromScratch32 varint64 -> varint32
+//hyperpb:stencil parseZigZag32 parseZigZag[uint32] StoreFromScratch -> StoreFromScratch32 vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parseZigZag64 parseZigZag[uint64] StoreFromScratch -> StoreFromScratch64
 func parseZigZag[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	p1, p2 = vm.P1.SetScratch(varint64(p1, p2))
+	p1, p2 = vm.P1.SetScratch(vm.Varint64(p1, p2))
 	p1, p2 = p1.SetScratch(p2, uint64(zigzag.Decode64[T](p2.Scratch())))
 
 	var p *T

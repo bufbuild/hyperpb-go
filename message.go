@@ -39,7 +39,7 @@ var (
 	errInvalid = errors.New("hyperpb: invalid message")
 
 	//go:linkname hyperpbMessage buf.build/go/hyperpb/internal/tdp/profile.hyperpbMessage
-	hyperpbMessage = xunsafe.AnyType((*Message)(nil))
+	hyperpbMessage = xunsafe.TypeOf((*Message)(nil))
 )
 
 // Message implements [protoreflect.Message].

@@ -43,5 +43,6 @@ require (
 tool (
 	buf.build/go/hyperpb/internal/tools/hyperdump
 	buf.build/go/hyperpb/internal/tools/hyperstencil
+	buf.build/go/hyperpb/internal/tools/hypertag
 	buf.build/go/hyperpb/internal/tools/hypertest
 )

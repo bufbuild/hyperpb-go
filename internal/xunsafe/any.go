@@ -24,22 +24,48 @@ import (
 	"buf.build/go/hyperpb/internal/xsync"
 )
 
-var isDirectMap xsync.Map[reflect.Type, bool]
+var (
+	isDirectMap     xsync.Map[reflect.Type, bool]
+	reflectTypeItab = BitCast[iface](reflect.TypeFor[int]()).itab
+)
 
 // iface is the internal representation an a Go interface value.
 type iface struct {
-	itab uintptr
+	itab Type
 	data *byte
+}
+
+// Type is a pointer to a type descriptor from the runtime.
+//
+// This memory is not managed by the GC, so it does not need to be a Go pointer.
+type Type Addr[byte]
+
+// TypeFor returns the [Type] for a given type parameter.
+func TypeFor[T any]() Type {
+	return FromReflect(reflect.TypeFor[T]())
+}
+
+// TypeOf extracts the opaque type from an any.
+func TypeOf(v any) Type {
+	return Cast[iface](NoEscape(&v)).itab
+}
+
+// FromReflect converts a [reflect.Type] into an opaque type pointer.
+func FromReflect(t reflect.Type) Type {
+	return Type(AddrOf(AnyData(t)))
+}
+
+// Reflect returns the [reflect.Type] for an opaque type pointer.
+func (t Type) Reflect() reflect.Type {
+	return BitCast[reflect.Type](iface{
+		itab: reflectTypeItab,
+		data: Addr[byte](t).AssertValid(),
+	})
 }
 
 // AnyData extracts the pointer value from an any.
 func AnyData(v any) *byte {
 	return Cast[iface](NoEscape(&v)).data
-}
-
-// AnyType extracts the opaque type from an any.
-func AnyType(v any) uintptr {
-	return Cast[iface](NoEscape(&v)).itab
 }
 
 // AnyBytes extracts a slice pointing to the variable-length data of an any.
@@ -57,8 +83,13 @@ func AnyBytes(v any) []byte {
 	return Bytes(&p2)
 }
 
+// AnyCast changes the type of an any.
+func AnyCast(ty reflect.Type, v any) any {
+	return MakeAny(FromReflect(ty), AnyData(v))
+}
+
 // MakeAny builds an any out of the given data.
-func MakeAny(typ uintptr, data *byte) any {
+func MakeAny(typ Type, data *byte) any {
 	raw := iface{typ, data}
 	return BitCast[any](raw)
 }

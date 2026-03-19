@@ -44,7 +44,7 @@ func New(data []byte, m *dynamic.Message, options *options.Options) (P1, P2) {
 	p3 := p3Pool.Get()
 	p3.Options = *options
 
-	data = memory.RelocatePageBoundary(data, !p3.AllowAlias, 15)
+	data, m.Shared.End = memory.RelocatePageBoundary(data, !p3.AllowAlias, 15)
 	m.Shared.Src = unsafe.SliceData(data)
 	m.Shared.Len = len(data)
 	// The arena keeps m.context alive, so we don't need to KeepAlive src.

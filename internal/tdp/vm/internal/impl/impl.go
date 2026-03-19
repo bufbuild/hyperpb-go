@@ -177,7 +177,10 @@ func (p1 P1) Log(p2 P2, op, format string, args ...any) {
 
 	start := p1.PtrAddr.Sub(xunsafe.AddrOf(p1.Src()))
 	end := p1.EndAddr.Sub(xunsafe.AddrOf(p1.Src()))
-	height := p2.P3().stack.bottom.Sub(p2.P3().stack.ptr)
+	var height int
+	if p2.P3() != nil {
+		height = p2.P3().stack.bottom.Sub(p2.P3().stack.ptr)
+	}
 	var b byte
 	if p1.PtrAddr < p1.EndAddr {
 		b = *p1.Ptr()

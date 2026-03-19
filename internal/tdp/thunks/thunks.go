@@ -22,7 +22,6 @@ import (
 
 	"buf.build/go/hyperpb/internal/tdp/compiler"
 	"buf.build/go/hyperpb/internal/tdp/profile"
-	"buf.build/go/hyperpb/internal/tdp/vm"
 )
 
 //go:generate go tool hyperstencil
@@ -70,17 +69,4 @@ func fieldKind(fd protoreflect.FieldDescriptor, prof profile.Field) protoreflect
 	default:
 		return k
 	}
-}
-
-// Helpers for allowing stencils to select between varint32 and varint64, since
-// it does not support replacing free functions of the form a.F.
-
-//go:nosplit
-func varint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
-	return vm.Varint32(p1, p2)
-}
-
-//go:nosplit
-func varint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, uint64) {
-	return vm.Varint64(p1, p2)
 }

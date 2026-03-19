@@ -49,6 +49,7 @@ type runner struct {
 	race     bool     // Whether to build with -race.
 	unopt    bool     // Whether to build without optimizations.
 	args     []string // Args for the test binary(s).
+	env      []string // Env variables for builds.
 }
 
 type test string
@@ -104,7 +105,7 @@ func (r *runner) build() ([]test, error) {
 
 	// Build the command we're going to run.
 	cmd := exec.Command(r.tool, args...)
-	cmd.Env = os.Environ()
+	cmd.Env = append(os.Environ(), r.env...)
 	fmt.Printf("running: %s %s\n", cmd.Path, strings.Join(cmd.Args, " "))
 	if out, err := cmd.CombinedOutput(); err != nil {
 		if exit, ok := xerrors.As[*exec.ExitError](err); ok {
@@ -288,6 +289,7 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 		}
 
 		cmd, err := ssh.Command(test.binary(r, tmpdir), args...)
+		fmt.Printf("running: %s %s\n", cmd.Path, strings.Join(cmd.Args, " "))
 		if err != nil {
 			return "", err
 		}

@@ -217,28 +217,31 @@ func makeStencil(
 			}
 
 		case *ast.CallExpr:
-			if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
+			switch callee := n.Fun.(type) {
+			case *ast.SelectorExpr:
 				// Special case for calling a method that is in the renames
 				// array.
-				if arg, ok := dir.Renames[sel.Sel.Name]; ok {
+				if arg, ok := dir.Renames[callee.Sel.Name]; ok {
 					// Rewrite the function expression to an identifier.
 					n.Fun = &ast.Ident{Name: arg}
 
 					// Append the selectee as the first argument of the call.
-					n.Args = slices.Insert(n.Args, 0, sel.X)
+					n.Args = slices.Insert(n.Args, 0, callee.X)
+					break
 				}
-			} else if idx, ok := n.Fun.(*ast.IndexExpr); ok {
-				// Special case for calling a generic function.
-				if sel, ok := idx.X.(*ast.SelectorExpr); ok {
-					if arg, ok := dir.Renames[sel.Sel.Name]; ok {
-						// Rewrite the call to be non-generic.
-						sel.Sel.Name = arg
-						n.Fun = sel
+
+				// Check for the selector + the function being in the renames
+				// array.
+				if id, ok := callee.X.(*ast.Ident); ok {
+					if arg, ok := dir.Renames[id.Name+"."+callee.Sel.Name]; ok {
+						// Rewrite the function expression to an identifier.
+						n.Fun = &ast.Ident{Name: arg}
 					}
 				}
-			} else if idx, ok := n.Fun.(*ast.IndexExpr); ok {
+
+			case *ast.IndexExpr:
 				// Special case for calling a generic function.
-				if sel, ok := idx.X.(*ast.SelectorExpr); ok {
+				if sel, ok := callee.X.(*ast.SelectorExpr); ok {
 					if arg, ok := dir.Renames[sel.Sel.Name]; ok {
 						// Rewrite the call to be non-generic.
 						sel.Sel.Name = arg

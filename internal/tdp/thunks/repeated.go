@@ -226,12 +226,12 @@ func getRepeatedBytes(m *dynamic.Message, _ *tdp.Type, getter *tdp.Accessor) pro
 
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
-//hyperpb:stencil parseRepeatedVarint8 parseRepeatedVarint[uint8] appendVarint -> appendVarint8 varint64 -> varint32
-//hyperpb:stencil parseRepeatedVarint32 parseRepeatedVarint[uint32] appendVarint -> appendVarint32 varint64 -> varint32
+//hyperpb:stencil parseRepeatedVarint8 parseRepeatedVarint[uint8] appendVarint -> appendVarint8 vm.Varint64 -> vm.Varint32
+//hyperpb:stencil parseRepeatedVarint32 parseRepeatedVarint[uint32] appendVarint -> appendVarint32 vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parseRepeatedVarint64 parseRepeatedVarint[uint64] appendVarint -> appendVarint64
 func parseRepeatedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n uint64
-	p1, p2, n = varint64(p1, p2)
+	p1, p2, n = vm.Varint64(p1, p2)
 
 	var r *repeated.Scalars[byte, T]
 	p1, p2, r = vm.GetMutableField[repeated.Scalars[byte, T]](p1, p2)
@@ -271,8 +271,8 @@ func parseRepeatedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 // //go:nosplit // TODO(#30): Enable once upstream is fixed.
 //
 //go:norace // Race instrumentation causes this function to fail the nosplit check.
-//hyperpb:stencil parsePackedVarint8 parsePackedVarint[uint8] varint32 -> varint64
-//hyperpb:stencil parsePackedVarint32 parsePackedVarint[uint32] varint32 -> varint64
+//hyperpb:stencil parsePackedVarint8 parsePackedVarint[uint8] vm.Varint64 -> vm.Varint32
+//hyperpb:stencil parsePackedVarint32 parsePackedVarint[uint32] vm.Varint64 -> vm.Varint32
 //hyperpb:stencil parsePackedVarint64 parsePackedVarint[uint64]
 func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var n int
@@ -376,7 +376,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 				x = uint64(*p1.Ptr()&0x7f) | uint64(*c.AssertValid())<<7
 				p1.PtrAddr += 2
 			} else {
-				p1, p2, x = varint64(p1, p2)
+				p1, p2, x = vm.Varint64(p1, p2)
 			}
 
 			*p.AssertValid() = T(x)
@@ -390,7 +390,7 @@ func parsePackedVarint[T tdp.Int](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	default:
 		for {
 			var x uint64
-			p1, p2, x = varint64(p1, p2)
+			p1, p2, x = vm.Varint64(p1, p2)
 
 			*p.AssertValid() = T(x)
 			p = p.Add(1)

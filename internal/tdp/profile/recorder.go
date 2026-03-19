@@ -29,6 +29,7 @@ import (
 	"buf.build/go/hyperpb/internal/tdp/dynamic"
 	"buf.build/go/hyperpb/internal/xprotoreflect"
 	"buf.build/go/hyperpb/internal/xsync"
+	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
 // hyperpbMessage is the itab for *hyperpb.Message.
@@ -36,7 +37,7 @@ import (
 // This is connected to the root package via linkname.
 //
 //go:linkname hyperpbMessage
-var hyperpbMessage uintptr
+var hyperpbMessage xunsafe.Type
 
 // Recorder is a profile recorder, which walks a message to record information
 // about its fields after a successful parse.
