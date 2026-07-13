@@ -139,7 +139,7 @@ func (test *TestCase) Run(t *testing.T, ctx *hyperpb.Shared, verbose bool) {
 		t.Skipf("skipping large test because of -tags debug; set -test.run to run it anyways")
 	}
 
-	run := func(t *testing.T, specimen []byte) {
+	run := func(t *testing.T, specimen []byte, prof *hyperpb.Profile) {
 		t.Helper()
 
 		runtimedebug.SetPanicOnFault(true)
@@ -151,7 +151,15 @@ func (test *TestCase) Run(t *testing.T, ctx *hyperpb.Shared, verbose bool) {
 
 		// Parse using hyperpb.
 		m2 := ctx.NewMessage(test.Type.Fast)
-		err2 := proto.Unmarshal(specimen, m2)
+		var err2 error
+		if prof != nil {
+			err2 = m2.Unmarshal(specimen, hyperpb.WithRecordProfile(prof, 1.0))
+			if err2 == nil {
+				err2 = m2.Initialized()
+			}
+		} else {
+			err2 = proto.Unmarshal(specimen, m2)
+		}
 
 		if verbose {
 			t.Logf("theirs: %v, ours: %v", err1, err2)
@@ -183,17 +191,21 @@ func (test *TestCase) Run(t *testing.T, ctx *hyperpb.Shared, verbose bool) {
 		}
 	}
 
-	if len(test.Specimens) == 1 {
-		run(t, test.Specimens[0])
-		return
-	}
-
+	prof := test.Type.Fast.NewProfile()
 	for _, specimen := range test.Specimens {
-		t.Run("", func(t *testing.T) {
-			t.Parallel()
-			run(t, specimen)
+		t.Run("base", func(t *testing.T) {
+			run(t, specimen, prof)
 		})
 	}
+
+	old := test.Type.Fast
+	test.Type.Fast = test.Type.Fast.Recompile(prof)
+	for _, specimen := range test.Specimens {
+		t.Run("pgo", func(t *testing.T) {
+			run(t, specimen, nil)
+		})
+	}
+	test.Type.Fast = old
 }
 
 // parseTestCase parses a single test case from the given data.

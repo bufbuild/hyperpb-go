@@ -525,7 +525,7 @@ func parseRepeatedBytes(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1, p2, r = vm.GetMutableField[repeated.Bytes](p1, p2)
 	if r.Raw.Ptr() == nil {
 		if preload := p2.Field().Preload; preload > 0 {
-			r.Raw = slice.Make[zc.Range](p1.Arena(), int(preload))
+			r.Raw = slice.Make[zc.Range](p1.Arena(), int(preload)).SetLen(0)
 		}
 	}
 
@@ -544,7 +544,7 @@ func parseRepeatedUTF8(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	p1, p2, r = vm.GetMutableField[repeated.Strings](p1, p2)
 	if r.Raw.Ptr() == nil {
 		if preload := p2.Field().Preload; preload > 0 {
-			r.Raw = slice.Make[zc.Range](p1.Arena(), int(preload))
+			r.Raw = slice.Make[zc.Range](p1.Arena(), int(preload)).SetLen(0)
 		}
 	}
 
