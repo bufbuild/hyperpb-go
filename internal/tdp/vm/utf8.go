@@ -16,6 +16,7 @@ package vm
 
 import (
 	"math/bits"
+	"unicode/utf8"
 
 	"buf.build/go/hyperpb/internal/debug"
 	"buf.build/go/hyperpb/internal/tdp"
@@ -23,6 +24,21 @@ import (
 	"buf.build/go/hyperpb/internal/xunsafe/layout"
 	"buf.build/go/hyperpb/internal/zc"
 )
+
+// runeBytesForBits maps bits.Len32 of a rune to the number of bytes needed to
+// encode it as UTF-8. Index 0 (the rune 0) maps to 1; out-of-range runes map
+// to 0, so an overlong encoding never matches its byte count.
+var runeBytesForBits = func() (table [34]byte) {
+	table[0] = 1
+	for i := range 33 {
+		n := utf8.RuneLen(rune(1) << i)
+		if n < 0 {
+			break
+		}
+		table[i+1] = byte(n)
+	}
+	return table
+}()
 
 // verifyUTF8 validates that the next n bytes after p1.Ptr() are valid UTF-8.
 //
@@ -137,27 +153,17 @@ unicode:
 
 		p1.Log(p2, "decoded rune", "U+%04x (%q)", r, r)
 
-		// Next we check that the length is correct. To do this, we need
-		// to map the following ranges like so (note that we don't need to
-		// worry about ASCII, as above):
+		// Next we check that the length is correct. The number of bytes
+		// needed to encode a rune is a step function of its magnitude, with
+		// boundaries at the powers of two U+0080, U+0800, and U+10000. Because
+		// each boundary is a power of two, the length is constant across a
+		// single bits.Len32 bucket, so we can look it up directly. An overlong
+		// encoding decodes to a rune whose natural length is smaller than
+		// count, so the mismatch below rejects it.
 		//
-		// U+0080..U+07FF -> 2
-		// U+0800..U+FFFF -> 3
-		// U+FFFF...      -> 4
-		//
-		// bits.Len / 4 will map each of these to ranges as follows:
-		//
-		// U+0080..U+07FF -> 8..11 -> 2
-		// U+0800..U+FFFF -> 12..16 -> 3..4
-		// U+10000...     -> 17...  -> 4
-		//
-		// This is almost correct. We just need to subtract 1 in the case
-		// that bits.Len returns 16.
-		wantCount := bits.Len32(uint32(r))
-		if wantCount == 16 {
-			wantCount--
-		}
-		wantCount /= 4
+		// Previously, we used a bit of clever arithmetic involving division by
+		// 4, which failed for astral plane runes.
+		wantCount := int(runeBytesForBits[bits.Len32(uint32(r))])
 
 		p1.Log(p2, "rune size", "want: %d, got: %d", wantCount, count)
 		if wantCount != int(count) {
