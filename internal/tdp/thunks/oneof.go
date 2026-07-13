@@ -230,7 +230,7 @@ func parseOneofVarint32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 //go:nosplit
 func parseOneofVarint64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	xunsafe.ByteStore(p2.Message(), p2.Field().Offset.Bit, p2.Field().Offset.Number)
-	return parseVarint32(p1, p2)
+	return parseVarint64(p1, p2)
 }
 
 //go:nosplit
@@ -242,7 +242,7 @@ func parseOneofZigZag32(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 //go:nosplit
 func parseOneofZigZag64(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	xunsafe.ByteStore(p2.Message(), p2.Field().Offset.Bit, p2.Field().Offset.Number)
-	return parseZigZag32(p1, p2)
+	return parseZigZag64(p1, p2)
 }
 
 //go:nosplit
