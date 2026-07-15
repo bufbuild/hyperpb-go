@@ -12,7 +12,7 @@ permissions:
   contents: read
 jobs:
   ci:
-    name: "Tests and Benchmarks (${{ matrix.os }}, ${{ matrix.mode }}, ${{ matrix.go-version.name }})"
+    name: "Tests and Benchmarks (${{ matrix.os }}, ${{ matrix.mode }}, go:${{ matrix.go-version.name }})"
     strategy:
       matrix:
         # We use macos here because those are the only ARM runners available
@@ -70,7 +70,7 @@ jobs:
         run: make bench BENCHMARK="B/^descriptor.yaml"
 
   lint:
-    name: "Lint (${{ matrix.go-version.name }})"
+    name: "Lint (go:${{ matrix.go-version.name }})"
     runs-on: ubuntu-latest
     strategy:
       matrix:
