@@ -324,7 +324,7 @@ func run() error {
 		mtime = info.ModTime()
 	}
 
-	var files []string //nolint:prealloc
+	var files []string
 	var newer bool
 	for _, dirent := range dir {
 		if dirent.Type().IsDir() ||

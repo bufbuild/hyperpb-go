@@ -37,7 +37,7 @@ import (
 	"buf.build/go/hyperpb/internal/xunsafe"
 )
 
-// CompileOption is a configuration setting for [Compile].
+// Options is the configuration for [Compile].
 type Options struct {
 	Profile    profile.Profile
 	Extensions ExtensionResolver

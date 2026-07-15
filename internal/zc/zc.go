@@ -89,7 +89,7 @@ type ExtractFrom struct {
 	Src *byte
 }
 
-// ExtractBytes returns a func that calls [Range.Bytes].
+// Bytes calls [Range.Bytes] on the given raw range.
 //
 // This exists to work around inlining failure in certain places in the parser.
 func (e ExtractFrom) Bytes(raw uint64) []byte {

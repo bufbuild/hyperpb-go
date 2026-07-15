@@ -54,9 +54,9 @@ type Type struct {
 	//    aforementioned field table.
 }
 
-// byIndex returns the nth byIndex (in byIndex number order) for this type.
+// ByIndex returns the nth field (in field number order) for this type.
 //
-// If n == 0 and this type has no fields, returns a byIndex with an invalid byIndex number.
+// If n == 0 and this type has no fields, returns a field with an invalid field number.
 //
 // This function does not perform bounds checks.
 func (t *Type) ByIndex(n int) *Field {

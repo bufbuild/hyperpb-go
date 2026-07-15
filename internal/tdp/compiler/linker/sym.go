@@ -65,7 +65,7 @@ func (s *Sym) Push(v any) int {
 	return s.PushBytes(align, xunsafe.AnyBytes(v))
 }
 
-// Push appends raw bytes to this symbol, ensuring that it is correctly-aligned.
+// PushBytes appends raw bytes to this symbol, ensuring that it is correctly-aligned.
 //
 // Returns the offset of the pushed data.
 func (s *Sym) PushBytes(align int, data []byte) int {

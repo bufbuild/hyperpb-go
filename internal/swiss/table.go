@@ -234,7 +234,7 @@ func (t *Table[K, V]) LookupFunc(k []byte, extract func(K) []byte) *V {
 	return t.values().Get(idx)
 }
 
-// insert returns a pointer to the slot for the given key. extract is an
+// Insert returns a pointer to the slot for the given key. extract is an
 // optional function for extracting variable-length key material from keys
 // in the table.
 //
