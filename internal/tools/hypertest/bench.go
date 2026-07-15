@@ -74,7 +74,7 @@ func parseBenchmarkOutput(stdout string) *benchReport {
 
 	var prev string
 	subtests := map[string]int{}
-	for _, line := range strings.Split(stdout, "\n") {
+	for line := range strings.SplitSeq(stdout, "\n") {
 		if !strings.HasPrefix(line, "Benchmark") {
 			continue
 		}

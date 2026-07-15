@@ -133,7 +133,7 @@ func parseDump(data string) (fns []Func, err error) {
 		return arg
 	}
 
-	for _, line := range strings.Split(data, "\n") {
+	for line := range strings.SplitSeq(data, "\n") {
 		if line == "" {
 			continue
 		}
