@@ -31,7 +31,7 @@ import "unsafe"
 //
 //go:nocheckptr
 func ByteAdd[T any, P ~*E, E any, I Int](p P, n I) *T {
-	return (*T)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + uintptr(n)))
+	return (*T)(unsafe.Add(unsafe.Pointer(p), n))
 }
 
 // ByteSub computes the difference between two pointers, without scaling.
