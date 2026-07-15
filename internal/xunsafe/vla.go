@@ -48,7 +48,7 @@ func (a *VLA[T]) Get(n int) *T {
 	return Add(Cast[T](a), n)
 }
 
-// Get returns a pointer to the element of this array at the given byte offset.
+// ByteGet returns a pointer to the element of this array at the given byte offset.
 func (a *VLA[T]) ByteGet(n int) *T {
 	return ByteAdd[T](a, n)
 }

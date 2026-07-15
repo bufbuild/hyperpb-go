@@ -158,8 +158,8 @@ func (m *Message) Get(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	return fd.Default()
 }
 
-// GetByIndex is like [Message.Get], but it takes a raw field index, performing
-// no bounds checks.
+// GetByIndexUnchecked is like [Message.Get], but it takes a raw field index,
+// performing no bounds checks.
 func (m *Message) GetByIndexUnchecked(n int) protoreflect.Value {
 	return m.Type().ByIndex(n).Get(unsafe.Pointer(m))
 }
@@ -201,7 +201,7 @@ func (m *Message) GetBit(n uint32) bool {
 	return word&mask != 0
 }
 
-// StBit sets the value of the nth bit from this message's bitset.
+// SetBit sets the value of the nth bit from this message's bitset.
 func (m *Message) SetBit(n uint32, flag bool) {
 	words := xunsafe.Cast[uint32](xunsafe.Add(m, 1))
 	word := xunsafe.Add(words, int(n)/32)
@@ -219,7 +219,7 @@ func (m *Message) Type() *tdp.Type {
 	return m.Shared.lib.AtOffset(m.TypeOffset)
 }
 
-// cold returns a pointer to the cold region, or nil if it hasn't been allocated.
+// Cold returns a pointer to the cold region, or nil if it hasn't been allocated.
 func (m *Message) Cold() *Cold {
 	if m.ColdIndex < 0 {
 		return nil

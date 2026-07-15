@@ -74,7 +74,7 @@ func parseBenchmarkOutput(stdout string) *benchReport {
 
 	var prev string
 	subtests := map[string]int{}
-	for _, line := range strings.Split(stdout, "\n") {
+	for line := range strings.SplitSeq(stdout, "\n") {
 		if !strings.HasPrefix(line, "Benchmark") {
 			continue
 		}
@@ -241,7 +241,8 @@ func (r *benchReport) toCSV(w io.Writer) error {
 	}
 
 	indices := map[[2]int]int{}
-	header := []string{"benchmark"}
+	header := make([]string, 0, 1+len(r.columns)*len(r.subtests))
+	header = append(header, "benchmark")
 	for i, c := range r.columns {
 		for j, subtest := range r.subtests {
 			indices[[2]int{i, j}] = len(header)
@@ -249,7 +250,8 @@ func (r *benchReport) toCSV(w io.Writer) error {
 		}
 	}
 
-	cells := [][]string{header}
+	cells := make([][]string, 0, 1+len(r.benches))
+	cells = append(cells, header)
 	for _, bs := range r.benches {
 		row := make([]string, len(header))
 		cells = append(cells, row)

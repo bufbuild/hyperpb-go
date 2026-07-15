@@ -24,6 +24,7 @@ linters:
     - exhaustive                # Seemingly made of false positives.
     - exhaustruct               # Listing every field is not idiomatic.
     - forcetypeassert           # Covered by errcheck.
+    - goprintffuncname          # Our printf-like helpers take a leading op argument.
 
     - gochecknoglobals          # Several places require globals for performance (e.g. sync.Pool).
     - gochecknoinits            # Ditto. ^
@@ -111,6 +112,8 @@ linters:
       - { path: '.*', text: 'G404: Use of weak random number generator.*' }
       - { path: '.*', text: 'G306: Expect WriteFile permissions to be 0600 or less.*' }
       - { path: '.*', text: 'G204: Subprocess launched with a potential tainted input or cmd arguments' }
+      # Our dev tools intentionally operate on user-provided paths.
+      - { path: '.*', text: 'G703: Path traversal via taint analysis' }
       # We call this parameter `t`.
       - { path: '.*', text: 'parameter testing.TB should have name tb' }
 

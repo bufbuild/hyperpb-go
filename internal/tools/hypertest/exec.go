@@ -219,9 +219,7 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 	wg := new(sync.WaitGroup)
 	syncErr := new(atomic.Pointer[error])
 	for _, test := range tests {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			{
 				start := time.Now()
 				src, err := os.Open(test.binary(r, ""))
@@ -249,7 +247,7 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 			}
 		error:
 			syncErr.CompareAndSwap(nil, &err)
-		}()
+		})
 	}
 	wg.Wait()
 	if err := syncErr.Load(); err != nil {
