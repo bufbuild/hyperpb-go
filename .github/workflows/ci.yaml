@@ -12,19 +12,23 @@ permissions:
   contents: read
 jobs:
   ci:
-    name: "Tests and Benchmarks (${{ matrix.os }}, ${{ matrix.mode }}, go:${{ matrix.go-version.name }})"
+    name: "Tests and Benchmarks (${{ matrix.os.name }}, ${{ matrix.mode }}, go:${{ matrix.go-version.name }})"
     strategy:
       matrix:
         # We use macos here because those are the only ARM runners available
         # to private repositories.
-        os: [ubuntu-latest, macos-15]
+        os:
+          - name: ubuntu
+            version: ubuntu-latest
+          - name: macos
+            version: macos-latest
         mode: [fast, debug, race, unopt]
         go-version:
           - name: latest
             version: 1.26.x
           - name: previous
             version: 1.25.x
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.version }}
 
     steps:
       - name: Checkout Code
