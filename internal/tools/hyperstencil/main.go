@@ -368,9 +368,7 @@ func run() error {
 	// Stenciling isn't super fast; parallelizing it helps a lot.
 	decls := make([][]ast.Decl, len(files))
 	for i, path := range files {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			file, err := parser.ParseFile(fset, path, nil, parser.ParseComments|parser.SkipObjectResolution)
 			if err != nil {
 				ch <- fmt.Errorf("%s:%w", path, err)
@@ -439,10 +437,7 @@ func run() error {
 			*decls = make([]ast.Decl, len(directives))
 
 			for i, dir := range directives {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
+				wg.Go(func() {
 					// Start by finding a func in file with this name.
 					generic := funcs[dir.Source]
 					stencil, err := makeStencil(dir, generic, &bases, &attrs)
@@ -453,9 +448,9 @@ func run() error {
 
 					// Finally, append stencil to the output file.
 					(*decls)[i] = stencil
-				}()
+				})
 			}
-		}()
+		})
 	}
 
 	wg.Wait()

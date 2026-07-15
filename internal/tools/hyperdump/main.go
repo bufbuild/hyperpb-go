@@ -323,11 +323,9 @@ func run(binary string) error {
 	// Annotate each function with jump labels.
 	wg := new(sync.WaitGroup)
 	for i := range fns {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			generateLabels(&fns[i])
-		}()
+		})
 	}
 	wg.Wait()
 
