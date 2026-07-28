@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -25,7 +26,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"syscall"
 	"time"
 
 	"al.essio.dev/pkg/shellescape"
@@ -311,28 +311,33 @@ func (r *runner) runOverSSH(remote string, tests []test) (string, error) {
 	return stdout.String(), nil
 }
 
+// interactive prompt handler for asking questions on the command line
 func askStdin(name, instruction string, questions []string, echos []bool) (answers []string, err error) {
 	if len(questions) == 0 && name != "" {
 		fmt.Printf("%s: %s\n", name, instruction)
 	}
 
 	answers = make([]string, len(questions))
+	reader := bufio.NewReader(os.Stdin) // to allow capturing multiple words
+
 	for i, q := range questions {
 		fmt.Printf("%s ", q)
 		if echos[i] {
-			_, err := fmt.Scan("%s", &answers[i])
+			// Normal input (echo on) → allow spaces
+			input, err := reader.ReadString('\n')
 			if err != nil {
 				return nil, err
 			}
+			answers[i] = strings.TrimSpace(input)
 			continue
 		}
-
-		answer, err := term.ReadPassword(syscall.Stdin)
+		// Hidden input - use os.Stdin.Fd for portability
+		answer, err := term.ReadPassword(int(os.Stdin.Fd()))
 		fmt.Println()
 		if err != nil {
 			return nil, err
 		}
-		answers[i] = string(answer)
+		answers[i] = strings.TrimSpace(string(answer)) // clean trailing spaces and lines
 	}
 
 	return answers, nil
