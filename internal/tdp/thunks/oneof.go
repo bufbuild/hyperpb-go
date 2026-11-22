@@ -283,11 +283,27 @@ func parseOneofBool(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 }
 
 func parseOneofMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	xunsafe.ByteStore(p2.Message(), p2.Field().Offset.Bit, p2.Field().Offset.Number)
-	return parseMessage(p1, p2)
+	p1, p2, n := p1.LengthPrefix(p2)
+	p1, p2 = p1.SetScratch(p2, uint64(n))
+	p1, p2, m := getOrAllocOneofMessage(p1, p2)
+	return p1.PushMessage(p2, m)
 }
 
 func parseOneofGroup(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
-	xunsafe.ByteStore(p2.Message(), p2.Field().Offset.Bit, p2.Field().Offset.Number)
-	return parseGroup(p1, p2)
+	p1, p2, m := getOrAllocOneofMessage(p1, p2)
+	return p1.PushGroup(p2, m)
+}
+
+func getOrAllocOneofMessage(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2, *dynamic.Message) {
+	p1, p2, slot := vm.GetMutableField[*dynamic.Message](p1, p2)
+	offset := p2.Field().Offset
+	which := xunsafe.ByteAdd[uint32](p2.Message(), offset.Bit)
+	if *which == offset.Number {
+		return p1, p2, *slot
+	}
+
+	p1, p2, m := vm.AllocMessage(p1, p2)
+	xunsafe.StoreNoWB(slot, m)
+	*which = offset.Number
+	return p1, p2, m
 }
