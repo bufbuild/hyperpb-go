@@ -7336,7 +7336,9 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7347,6 +7349,8 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7355,10 +7359,13 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7369,6 +7376,7 @@ func parseMapV32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -7436,7 +7444,9 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7447,6 +7457,8 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7455,10 +7467,13 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7469,6 +7484,7 @@ func parseMapV64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -7536,7 +7552,9 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7547,6 +7565,8 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7555,10 +7575,13 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7569,6 +7592,7 @@ func parseMapZ32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -7636,7 +7660,9 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7647,6 +7673,8 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7655,10 +7683,13 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7669,6 +7700,7 @@ func parseMapZ64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -7736,7 +7768,9 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7747,6 +7781,8 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7755,10 +7791,13 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7769,6 +7808,7 @@ func parseMapF32xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -7836,7 +7876,9 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7847,6 +7889,8 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7855,10 +7899,13 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7869,6 +7916,7 @@ func parseMapF64xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -7936,7 +7984,9 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -7947,6 +7997,8 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -7955,10 +8007,13 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -7969,6 +8024,7 @@ func parseMapSxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -8036,7 +8092,9 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -8047,6 +8105,8 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -8055,10 +8115,13 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -8069,6 +8132,7 @@ func parseMapBxM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
@@ -8136,7 +8200,9 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	if p1.Len() == 0 {
 		fast = true
@@ -8147,6 +8213,8 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -8155,10 +8223,13 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 			p1.PtrAddr++
 
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -8169,6 +8240,7 @@ func parseMap2xM(p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) {
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
