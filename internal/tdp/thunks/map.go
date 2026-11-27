@@ -959,7 +959,9 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 	var fast bool
 
 	kTag := protowire.EncodeTag(1, ki.kind())
-	vTag := protowire.EncodeTag(1, protowire.BytesType)
+	// Map values are field 2, length-delimited. Field 1 is the key.
+	vTag := protowire.EncodeTag(2, protowire.BytesType)
+	entryLen := n
 
 	// Basically every map ever encodes its fields in order and does not
 	// have duplicate fields, so this is a hot fast path.
@@ -972,6 +974,10 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 		p1.PtrAddr++
 		p1, p2, k = ki.parse(p1, p2)
 		if p1.Len() == 0 {
+			// Key with no value. Protobuf keeps the key and supplies an
+			// empty message; n is still the entry length and must not be
+			// parsed as that message.
+			n = 0
 			fast = true
 			goto insert
 		}
@@ -979,12 +985,16 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 		if *p1.Ptr() == byte(vTag) {
 			p1.PtrAddr++
 			// Need to parse a length prefix and check if it reaches all the
-			// way to the end of the message.
+			// way to the end of the entry.
 			p1, p2, n = p1.LengthPrefix(p2)
-			if p1.EndAddr > p1.PtrAddr.Add(n) {
+			if p1.PtrAddr.Add(n) == p1.EndAddr {
 				fast = true
 				goto insert
 			}
+			// Trailing fields. Rescan the whole entry; n must stay the
+			// entry length so the slow path can rewind to the start.
+			p1.PtrAddr = p1.EndAddr.Add(-entryLen)
+			n = entryLen
 		}
 	}
 
@@ -997,6 +1007,8 @@ func parseMapKxM[KI mapItem[K], K swiss.Key](p1 vm.P1, p2 vm.P2) (vm.P1, vm.P2) 
 		case kTag:
 			p1, p2, k = ki.parse(p1, p2)
 		default:
+			// n is declared in this block so the outer entry length is kept
+			// for the rewind below. DecodeTag's field number must not replace it.
 			n, t := protowire.DecodeTag(tag)
 			m := protowire.ConsumeFieldValue(n, t, p1.Buf())
 			if m < 0 {
